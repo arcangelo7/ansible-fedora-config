@@ -108,3 +108,26 @@
     - desktop
     - browser
     - brave
+
+# Check if Thunderbird is already installed
+- name: Check if Thunderbird is installed
+  command: rpm -q thunderbird
+  register: thunderbird_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - desktop
+    - email
+    - thunderbird
+
+# Install Thunderbird
+- name: Install Thunderbird email client
+  dnf:
+    name: thunderbird
+    state: present
+  when: thunderbird_check.rc != 0
+  tags:
+    - desktop
+    - email
+    - thunderbird
