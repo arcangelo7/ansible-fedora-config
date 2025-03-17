@@ -20,6 +20,15 @@ development_packages:
   - python3-pip
   - nodejs
   - npm
+  - nano
+
+# Configurazione Git
+git_config:
+  user:
+    name: "arcangelo7"
+    email: "arcangelomas@gmail.com"
+  core:
+    editor: "nano"
 
 # Configurazione desktop
 desktop_theme: "Arc-Dark"

@@ -8,6 +8,34 @@
     - development
     - packages
 
+# Configura Git
+- name: Configura Git - username
+  git_config:
+    name: user.name
+    scope: global
+    value: "{{ git_config.user.name }}"
+  tags:
+    - development
+    - git
+
+- name: Configura Git - email
+  git_config:
+    name: user.email
+    scope: global
+    value: "{{ git_config.user.email }}"
+  tags:
+    - development
+    - git
+
+- name: Configura Git - editor
+  git_config:
+    name: core.editor
+    scope: global
+    value: "{{ git_config.core.editor }}"
+  tags:
+    - development
+    - git
+
 # Installa Docker
 - name: Verifica se Docker è già installato
   command: which docker
