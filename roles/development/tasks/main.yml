@@ -36,21 +36,112 @@
     - development
     - git
 
-# Installa Docker
-- name: Verifica se Docker è già installato
-  command: which docker
-  register: docker_check
+# Verifica requisiti per Docker Desktop
+- name: Verifica se il sistema è a 64 bit
+  shell: uname -m
+  register: architecture
   changed_when: false
-  failed_when: false
-  check_mode: no  # Esegui anche in modalità check
+  check_mode: no
   tags:
     - development
     - docker
+    - docker_requirements
 
-- name: Verifica se il servizio Docker esiste
+- name: Verifica memoria RAM disponibile
+  shell: free -g | awk '/^Mem:/{print $2}'
+  register: ram_size
+  changed_when: false
+  check_mode: no
+  tags:
+    - development
+    - docker
+    - docker_requirements
+
+- name: Verifica supporto KVM
+  shell: lsmod | grep kvm
+  register: kvm_support
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - development
+    - docker
+    - docker_requirements
+
+- name: Verifica supporto virtualizzazione CPU
+  shell: grep -E 'svm|vmx' /proc/cpuinfo
+  register: virt_support
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - development
+    - docker
+    - docker_requirements
+
+- name: Verifica ambiente desktop GNOME
   stat:
-    path: /usr/lib/systemd/system/docker.service
-  register: docker_service
+    path: /usr/bin/gnome-session
+  register: gnome_check
+  check_mode: no
+  tags:
+    - development
+    - docker
+    - docker_requirements
+
+- name: Verifica ambiente desktop KDE
+  stat:
+    path: /usr/bin/startkde
+  register: kde_check
+  check_mode: no
+  tags:
+    - development
+    - docker
+    - docker_requirements
+
+- name: Verifica ambiente desktop KDE Plasma
+  stat:
+    path: /usr/bin/startplasma-x11
+  register: kde_plasma_check
+  check_mode: no
+  tags:
+    - development
+    - docker
+    - docker_requirements
+
+- name: Verifica systemd come init system
+  shell: ps -p 1 | grep systemd
+  register: systemd_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - development
+    - docker
+    - docker_requirements
+
+- name: Verifica se tutti i requisiti sono soddisfatti
+  assert:
+    that:
+      - architecture.stdout == "x86_64"
+      - ram_size.stdout | int >= 4
+      - kvm_support.rc == 0
+      - virt_support.rc == 0
+      - gnome_check.stat.exists or kde_check.stat.exists or kde_plasma_check.stat.exists
+      - systemd_check.rc == 0
+    fail_msg: "Il sistema non soddisfa i requisiti minimi per Docker Desktop. Verifica che il sistema sia a 64 bit, abbia almeno 4GB di RAM, supporto KVM, supporto virtualizzazione CPU, ambiente desktop GNOME o KDE e systemd come init system."
+    success_msg: "Il sistema soddisfa tutti i requisiti per Docker Desktop."
+  register: docker_requirements_check
+  tags:
+    - development
+    - docker
+    - docker_requirements
+
+# Installa Docker Desktop
+- name: Verifica se Docker Desktop è già installato
+  stat:
+    path: /opt/docker-desktop
+  register: docker_desktop_check
   check_mode: no  # Esegui anche in modalità check
   tags:
     - development
@@ -66,43 +157,37 @@
     - development
     - docker
 
-- name: Installa dnf-plugins-core
+- name: Scarica il pacchetto RPM di Docker Desktop
+  get_url:
+    url: https://desktop.docker.com/linux/main/amd64/docker-desktop-x86_64.rpm
+    dest: /tmp/docker-desktop-x86_64.rpm
+    mode: '0644'
+  when: 
+    - not docker_desktop_check.stat.exists
+    - docker_requirements_check is success
+  tags:
+    - development
+    - docker
+
+- name: Installa Docker Desktop
   dnf:
-    name: dnf-plugins-core
+    name: /tmp/docker-desktop-x86_64.rpm
     state: present
+    disable_gpg_check: yes
+  when: 
+    - not docker_desktop_check.stat.exists
+    - docker_requirements_check is success
   tags:
     - development
     - docker
 
-- name: Aggiungi repository Docker
-  command: dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-  args:
-    creates: /etc/yum.repos.d/docker-ce.repo
-  when: docker_check.rc != 0
-  tags:
-    - development
-    - docker
-
-- name: Installa Docker Engine e plugin
-  dnf:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-    state: present
-  when: docker_check.rc != 0
-  tags:
-    - development
-    - docker
-
-- name: Abilita e avvia il servizio Docker
-  systemd:
-    name: docker
-    state: started
-    enabled: yes
-  when: docker_service.stat.exists | default(false)
+- name: Rimuovi il pacchetto RPM scaricato
+  file:
+    path: /tmp/docker-desktop-x86_64.rpm
+    state: absent
+  when: 
+    - not docker_desktop_check.stat.exists
+    - docker_requirements_check is success
   tags:
     - development
     - docker
@@ -112,7 +197,9 @@
     name: "{{ ansible_user_id }}"
     groups: docker
     append: yes
-  when: docker_group.rc == 0
+  when: 
+    - docker_group.rc == 0
+    - docker_requirements_check is success
   tags:
     - development
     - docker 
