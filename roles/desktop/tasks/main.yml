@@ -1,6 +1,6 @@
 ---
-# Installa temi e icone
-- name: Installa gnome-tweaks
+# Install themes and icons
+- name: Install gnome-tweaks
   dnf:
     name:
       - gnome-tweaks
@@ -9,8 +9,8 @@
     - desktop
     - themes
 
-# Installa estensioni GNOME
-- name: Installa estensioni GNOME
+# Install GNOME extensions
+- name: Install GNOME extensions
   dnf:
     name:
       - gnome-shell-extension-appindicator
@@ -21,8 +21,8 @@
     - desktop
     - gnome-extensions
 
-# Installa Brave Browser da Flatpak
-- name: Assicurati che Flatpak sia installato
+# Install Brave Browser from Flatpak
+- name: Ensure Flatpak is installed
   dnf:
     name: flatpak
     state: present
@@ -32,7 +32,7 @@
     - browser
     - brave
 
-- name: Aggiungi repository Flathub
+- name: Add Flathub repository
   command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
   become: yes
   tags:
@@ -40,7 +40,7 @@
     - browser
     - brave
 
-- name: Installa Brave Browser da Flathub
+- name: Install Brave Browser from Flathub
   command: flatpak install -y flathub com.brave.Browser
   become: yes
   tags:

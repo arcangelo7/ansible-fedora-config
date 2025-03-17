@@ -1,6 +1,6 @@
 ---
-# Installa strumenti di sviluppo
-- name: Installa strumenti di sviluppo
+# Install development tools
+- name: Install development tools
   dnf:
     name: "{{ development_packages }}"
     state: present
@@ -8,8 +8,8 @@
     - development
     - packages
 
-# Configura Git
-- name: Configura Git - username
+# Configure Git
+- name: Configure Git - username
   git_config:
     name: user.name
     scope: global
@@ -18,7 +18,7 @@
     - development
     - git
 
-- name: Configura Git - email
+- name: Configure Git - email
   git_config:
     name: user.email
     scope: global
@@ -27,7 +27,7 @@
     - development
     - git
 
-- name: Configura Git - editor
+- name: Configure Git - editor
   git_config:
     name: core.editor
     scope: global
@@ -36,8 +36,8 @@
     - development
     - git
 
-# Verifica requisiti per Docker Desktop
-- name: Verifica se il sistema è a 64 bit
+# Verify requirements for Docker Desktop
+- name: Check if system is 64-bit
   shell: uname -m
   register: architecture
   changed_when: false
@@ -47,7 +47,7 @@
     - docker
     - docker_requirements
 
-- name: Verifica memoria RAM disponibile
+- name: Check available RAM memory
   shell: free -g | awk '/^Mem:/{print $2}'
   register: ram_size
   changed_when: false
@@ -57,7 +57,7 @@
     - docker
     - docker_requirements
 
-- name: Verifica supporto KVM
+- name: Check KVM support
   shell: lsmod | grep kvm
   register: kvm_support
   changed_when: false
@@ -68,7 +68,7 @@
     - docker
     - docker_requirements
 
-- name: Verifica supporto virtualizzazione CPU
+- name: Check CPU virtualization support
   shell: grep -E 'svm|vmx' /proc/cpuinfo
   register: virt_support
   changed_when: false
@@ -79,7 +79,7 @@
     - docker
     - docker_requirements
 
-- name: Verifica ambiente desktop GNOME
+- name: Check GNOME desktop environment
   stat:
     path: /usr/bin/gnome-session
   register: gnome_check
@@ -89,7 +89,7 @@
     - docker
     - docker_requirements
 
-- name: Verifica ambiente desktop KDE
+- name: Check KDE desktop environment
   stat:
     path: /usr/bin/startkde
   register: kde_check
@@ -99,7 +99,7 @@
     - docker
     - docker_requirements
 
-- name: Verifica ambiente desktop KDE Plasma
+- name: Check KDE Plasma desktop environment
   stat:
     path: /usr/bin/startplasma-x11
   register: kde_plasma_check
@@ -109,7 +109,7 @@
     - docker
     - docker_requirements
 
-- name: Verifica systemd come init system
+- name: Check systemd as init system
   shell: ps -p 1 | grep systemd
   register: systemd_check
   changed_when: false
@@ -120,7 +120,7 @@
     - docker
     - docker_requirements
 
-- name: Verifica se tutti i requisiti sono soddisfatti
+- name: Check if all requirements are met
   assert:
     that:
       - architecture.stdout == "x86_64"
@@ -129,35 +129,35 @@
       - virt_support.rc == 0
       - gnome_check.stat.exists or kde_check.stat.exists or kde_plasma_check.stat.exists
       - systemd_check.rc == 0
-    fail_msg: "Il sistema non soddisfa i requisiti minimi per Docker Desktop. Verifica che il sistema sia a 64 bit, abbia almeno 4GB di RAM, supporto KVM, supporto virtualizzazione CPU, ambiente desktop GNOME o KDE e systemd come init system."
-    success_msg: "Il sistema soddisfa tutti i requisiti per Docker Desktop."
+    fail_msg: "The system does not meet the minimum requirements for Docker Desktop. Verify that the system is 64-bit, has at least 4GB of RAM, KVM support, CPU virtualization support, GNOME or KDE desktop environment, and systemd as init system."
+    success_msg: "The system meets all requirements for Docker Desktop."
   register: docker_requirements_check
   tags:
     - development
     - docker
     - docker_requirements
 
-# Installa Docker Desktop
-- name: Verifica se Docker Desktop è già installato
+# Install Docker Desktop
+- name: Check if Docker Desktop is already installed
   stat:
     path: /opt/docker-desktop
   register: docker_desktop_check
-  check_mode: no  # Esegui anche in modalità check
+  check_mode: no  # Run even in check mode
   tags:
     - development
     - docker
 
-- name: Verifica se il gruppo docker esiste
+- name: Check if docker group exists
   command: getent group docker
   register: docker_group
   changed_when: false
   failed_when: false
-  check_mode: no  # Esegui anche in modalità check
+  check_mode: no  # Run even in check mode
   tags:
     - development
     - docker
 
-- name: Scarica il pacchetto RPM di Docker Desktop
+- name: Download Docker Desktop RPM package
   get_url:
     url: https://desktop.docker.com/linux/main/amd64/docker-desktop-x86_64.rpm
     dest: /tmp/docker-desktop-x86_64.rpm
@@ -169,7 +169,7 @@
     - development
     - docker
 
-- name: Installa Docker Desktop
+- name: Install Docker Desktop
   dnf:
     name: /tmp/docker-desktop-x86_64.rpm
     state: present
@@ -181,7 +181,7 @@
     - development
     - docker
 
-- name: Rimuovi il pacchetto RPM scaricato
+- name: Remove downloaded RPM package
   file:
     path: /tmp/docker-desktop-x86_64.rpm
     state: absent
@@ -192,7 +192,7 @@
     - development
     - docker
 
-- name: Aggiungi utente corrente al gruppo docker
+- name: Add current user to docker group
   user:
     name: "{{ ansible_user_id }}"
     groups: docker

@@ -7,5 +7,4 @@
     - common
     - development
     - desktop
-    # Aggiungi altri ruoli qui man mano che li crei
-    # - applications 
+    - applications

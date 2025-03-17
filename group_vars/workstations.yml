@@ -1,7 +1,7 @@
 ---
-# Variabili per il gruppo workstations
+# Variables for the workstations group
 
-# Pacchetti comuni da installare
+# Common packages to install
 common_packages:
   - git
   - htop
@@ -9,7 +9,7 @@ common_packages:
   - wget
   - curl
 
-# Pacchetti di sviluppo da installare
+# Development packages to install
 development_packages:
   - gcc
   - gcc-c++
@@ -22,7 +22,7 @@ development_packages:
   - npm
   - nano
 
-# Configurazione Git
+# Git configuration
 git_config:
   user:
     name: "arcangelo7"
@@ -30,7 +30,7 @@ git_config:
   core:
     editor: "nano"
 
-# Configurazione desktop
+# Desktop configuration
 desktop_theme: "Arc-Dark"
 desktop_icon_theme: "Papirus-Dark"
 desktop_dark_mode: true 

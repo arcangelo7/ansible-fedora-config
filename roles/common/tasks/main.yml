@@ -1,6 +1,6 @@
 ---
-# Aggiorna il sistema
-- name: Aggiorna tutti i pacchetti
+# Update the system
+- name: Update all packages
   dnf:
     name: "*"
     state: latest
@@ -8,8 +8,8 @@
     - system
     - update
 
-# Installa pacchetti di base
-- name: Installa pacchetti di base
+# Install base packages
+- name: Install base packages
   dnf:
     name: "{{ common_packages }}"
     state: present
