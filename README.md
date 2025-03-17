@@ -38,6 +38,23 @@ This repository contains Ansible playbooks and roles to automatically configure 
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "cursor"
    ```
 
+## Idempotency
+
+This playbook is designed to be fully idempotent, meaning it can be run multiple times without causing unnecessary changes. Each task includes specific checks to determine if the operation is actually needed:
+
+- **System updates**: The playbook checks if updates are available before running the update process
+- **Package installation**: Each package is individually checked to see if it's already installed
+- **Git configuration**: The current Git settings are compared with the desired ones before making changes
+- **Docker installation**: The system checks if Docker Desktop is already installed and if requirements are met
+- **Application installation**: For applications like Cursor, the playbook verifies if the binaries, desktop entries, and PATH links already exist
+
+This makes the playbook:
+1. **Faster**: Skips operations that aren't needed
+2. **Safer**: Avoids unnecessary changes to the system
+3. **Reusable**: Can be run regularly to keep the system up to date and configured correctly
+
+You can safely run the entire playbook or specific parts using tags whenever you want to ensure your system matches the desired configuration.
+
 ## Repository Structure
 
 - `inventory.yml`: Ansible inventory file (configures localhost as target)

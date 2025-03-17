@@ -1,19 +1,64 @@
 ---
-# Install development tools
-- name: Install development tools
+# Check which development packages are already installed
+- name: Check installed development packages
   dnf:
-    name: "{{ development_packages }}"
-    state: present
+    list: "{{ development_packages }}"
+  register: installed_dev_packages
+  check_mode: yes
+  changed_when: false
   tags:
     - development
     - packages
 
-# Configure Git
+# Install development tools
+- name: Install development tools
+  dnf:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ development_packages }}"
+  when: item not in (installed_dev_packages.results | map(attribute='name') | list)
+  tags:
+    - development
+    - packages
+
+# Check current Git configurations
+- name: Check current Git username
+  shell: git config --global user.name
+  register: current_git_username
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - development
+    - git
+
+- name: Check current Git email
+  shell: git config --global user.email
+  register: current_git_email
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - development
+    - git
+
+- name: Check current Git editor
+  shell: git config --global core.editor
+  register: current_git_editor
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - development
+    - git
+
+# Configure Git only if needed
 - name: Configure Git - username
   git_config:
     name: user.name
     scope: global
     value: "{{ git_config.user.name }}"
+  when: current_git_username.stdout != git_config.user.name
   tags:
     - development
     - git
@@ -23,6 +68,7 @@
     name: user.email
     scope: global
     value: "{{ git_config.user.email }}"
+  when: current_git_email.stdout != git_config.user.email
   tags:
     - development
     - git
@@ -32,6 +78,7 @@
     name: core.editor
     scope: global
     value: "{{ git_config.core.editor }}"
+  when: current_git_editor.stdout != git_config.core.editor
   tags:
     - development
     - git
@@ -192,6 +239,17 @@
     - development
     - docker
 
+# Check if user is already in docker group
+- name: Check if user is in docker group
+  shell: id -nG {{ ansible_user_id }} | grep -o docker
+  register: user_in_docker_group
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - development
+    - docker
+
 - name: Add current user to docker group
   user:
     name: "{{ ansible_user_id }}"
@@ -200,6 +258,7 @@
   when: 
     - docker_group.rc == 0
     - docker_requirements_check is success
+    - user_in_docker_group.rc != 0
   tags:
     - development
     - docker 

@@ -1,10 +1,28 @@
 ---
+# Check if Cursor is already installed
+- name: Check if Cursor AppImage exists
+  stat:
+    path: "{{ cursor_appimage_dest }}"
+  register: cursor_appimage_check
+  tags:
+    - applications
+    - cursor
+
+- name: Check if Cursor is in PATH
+  stat:
+    path: "{{ bin_dir | default('/usr/local/bin') }}/cursor"
+  register: cursor_in_path
+  tags:
+    - applications
+    - cursor
+
 # Install Cursor AppImage
 - name: Create directory for AppImages
   file:
     path: "{{ appimages_dir }}"
     state: directory
     mode: '0755'
+  when: not cursor_appimage_check.stat.exists or not cursor_in_path.stat.exists
   tags:
     - applications
     - cursor
@@ -14,6 +32,7 @@
     url: "{{ cursor_appimage_url }}"
     dest: "{{ cursor_appimage_dest }}"
     mode: '0755'
+  when: not cursor_appimage_check.stat.exists
   tags:
     - applications
     - cursor
@@ -23,6 +42,7 @@
     path: /tmp/cursor-extract
     state: directory
     mode: '0755'
+  when: not cursor_appimage_check.stat.exists
   tags:
     - applications
     - cursor
@@ -32,6 +52,7 @@
   args:
     chdir: /tmp/cursor-extract
     creates: /tmp/cursor-extract/squashfs-root
+  when: not cursor_appimage_check.stat.exists
   tags:
     - applications
     - cursor
@@ -42,6 +63,7 @@
     patterns: "*.png,*.svg,*.ico"
     recurse: yes
   register: icon_files
+  when: not cursor_appimage_check.stat.exists
   tags:
     - applications
     - cursor
@@ -51,6 +73,7 @@
     path: "{{ cursor_icon_dest | dirname }}"
     state: directory
     mode: '0755'
+  when: not cursor_appimage_check.stat.exists
   tags:
     - applications
     - cursor
@@ -61,7 +84,7 @@
     dest: "{{ cursor_icon_dest }}"
     mode: '0644'
     remote_src: yes
-  when: icon_files.files | length > 0
+  when: not cursor_appimage_check.stat.exists and icon_files.files | length > 0
   tags:
     - applications
     - cursor
@@ -71,6 +94,7 @@
     src: cursor.desktop.j2
     dest: "{{ cursor_desktop_entry_dest }}"
     mode: '0644'
+  when: not cursor_appimage_check.stat.exists
   tags:
     - applications
     - cursor
@@ -82,6 +106,7 @@
     state: directory
     mode: '0755'
   become: true
+  when: not cursor_in_path.stat.exists
   tags:
     - applications
     - cursor
@@ -92,6 +117,7 @@
     dest: "{{ bin_dir | default('/usr/local/bin') }}/cursor"
     state: link
   become: true
+  when: not cursor_in_path.stat.exists
   tags:
     - applications
     - cursor
@@ -100,6 +126,7 @@
   file:
     path: /tmp/cursor-extract
     state: absent
+  when: not cursor_appimage_check.stat.exists
   tags:
     - applications
     - cursor 

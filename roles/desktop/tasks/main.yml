@@ -1,13 +1,36 @@
 ---
+# Check if gnome-tweaks is already installed
+- name: Check if gnome-tweaks is installed
+  command: rpm -q gnome-tweaks
+  register: gnome_tweaks_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - desktop
+    - themes
+
 # Install themes and icons
 - name: Install gnome-tweaks
   dnf:
     name:
       - gnome-tweaks
     state: present
+  when: gnome_tweaks_check.rc != 0
   tags:
     - desktop
     - themes
+
+# Check if GNOME extensions are already installed
+- name: Check installed GNOME extensions
+  command: rpm -q gnome-shell-extension-appindicator gnome-shell-extension-dash-to-dock gnome-extensions-app
+  register: gnome_extensions_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - desktop
+    - gnome-extensions
 
 # Install GNOME extensions
 - name: Install GNOME extensions
@@ -17,9 +40,22 @@
       - gnome-shell-extension-dash-to-dock
       - gnome-extensions-app
     state: present
+  when: gnome_extensions_check.rc != 0
   tags:
     - desktop
     - gnome-extensions
+
+# Verify if Flatpak is installed
+- name: Check if Flatpak is installed
+  command: which flatpak
+  register: flatpak_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - desktop
+    - browser
+    - brave
 
 # Install Brave Browser from Flatpak
 - name: Ensure Flatpak is installed
@@ -27,6 +63,18 @@
     name: flatpak
     state: present
   become: yes
+  when: flatpak_check.rc != 0
+  tags:
+    - desktop
+    - browser
+    - brave
+
+# Check if Flathub repository is already added
+- name: Check if Flathub repository is added
+  command: flatpak remote-list
+  register: flathub_check
+  changed_when: false
+  check_mode: no
   tags:
     - desktop
     - browser
@@ -35,6 +83,18 @@
 - name: Add Flathub repository
   command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
   become: yes
+  when: "'flathub' not in flathub_check.stdout"
+  tags:
+    - desktop
+    - browser
+    - brave
+
+# Check if Brave Browser is already installed
+- name: Check if Brave Browser is already installed
+  command: flatpak list --app
+  register: installed_flatpaks
+  changed_when: false
+  check_mode: no
   tags:
     - desktop
     - browser
@@ -43,6 +103,7 @@
 - name: Install Brave Browser from Flathub
   command: flatpak install -y flathub com.brave.Browser
   become: yes
+  when: "'com.brave.Browser' not in installed_flatpaks.stdout"
   tags:
     - desktop
     - browser
