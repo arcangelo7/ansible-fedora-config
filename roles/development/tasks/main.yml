@@ -1,22 +1,9 @@
 ---
-# Check which development packages are already installed
-- name: Check installed development packages
-  dnf:
-    list: "{{ development_packages }}"
-  register: installed_dev_packages
-  check_mode: yes
-  changed_when: false
-  tags:
-    - development
-    - packages
-
 # Install development tools
 - name: Install development tools
   dnf:
-    name: "{{ item }}"
+    name: "{{ development_packages }}"
     state: present
-  loop: "{{ development_packages }}"
-  when: item not in (installed_dev_packages.results | map(attribute='name') | list)
   tags:
     - development
     - packages

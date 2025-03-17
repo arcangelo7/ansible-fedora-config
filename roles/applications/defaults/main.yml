@@ -7,3 +7,6 @@ cursor_appimage_dest: "/opt/appimages/Cursor.AppImage"
 cursor_icon_dest: "/usr/share/icons/hicolor/256x256/apps/cursor.png"
 cursor_desktop_entry_dest: "/usr/share/applications/cursor.desktop"
 appimages_dir: "/opt/appimages" 
+
+# Discord Flatpak
+discord_flatpak_app_id: "com.discordapp.Discord" 

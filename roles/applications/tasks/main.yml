@@ -129,4 +129,35 @@
   when: not cursor_appimage_check.stat.exists
   tags:
     - applications
-    - cursor 
+    - cursor
+
+# Install Discord from Flathub
+- name: Check if Flathub is enabled
+  command: flatpak remotes --columns=name
+  register: flatpak_remotes
+  changed_when: false
+  tags:
+    - applications
+    - discord
+
+- name: Enable Flathub if not already enabled
+  command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  when: "'flathub' not in flatpak_remotes.stdout"
+  tags:
+    - applications
+    - discord
+
+- name: Check if Discord is already installed
+  command: flatpak list --app --columns=application
+  register: installed_flatpaks
+  changed_when: false
+  tags:
+    - applications
+    - discord
+
+- name: Install Discord from Flathub
+  command: flatpak install -y flathub {{ discord_flatpak_app_id }}
+  when: "discord_flatpak_app_id not in installed_flatpaks.stdout"
+  tags:
+    - applications
+    - discord 
