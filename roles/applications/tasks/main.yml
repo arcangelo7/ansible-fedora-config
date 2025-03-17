@@ -176,4 +176,38 @@
   when: "vlc_flatpak_app_id not in installed_flatpaks_vlc.stdout"
   tags:
     - applications
-    - vlc 
+    - vlc
+
+# Install openfortivpn
+- name: Install openfortivpn package
+  dnf:
+    name: openfortivpn
+    state: present
+  tags:
+    - applications
+    - vpn
+    - openfortivpn
+
+# Add VPN alias to user's .bashrc
+- name: Check if vpnunibo alias already exists in .bashrc
+  shell: grep -q "^alias vpnunibo=" "/home/{{ local_user }}/.bashrc"
+  register: vpnunibo_alias_check
+  failed_when: false
+  changed_when: false
+  become: false
+  tags:
+    - applications
+    - vpn
+    - openfortivpn
+
+- name: Add vpnunibo alias to .bashrc
+  lineinfile:
+    path: "/home/{{ local_user }}/.bashrc"
+    line: "alias vpnunibo='sudo openfortivpn vpn.unibo.it:443 -u arcangelo.massari@unibo.it'"
+    state: present
+  when: vpnunibo_alias_check.rc != 0
+  become: false
+  tags:
+    - applications
+    - vpn
+    - openfortivpn 

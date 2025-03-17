@@ -1,6 +1,9 @@
 ---
 # Variables for the workstations group
 
+# Local user configuration
+local_user: "arcangelo"
+
 # Fedora bloatware packages to remove
 fedora_bloatware:
   - gnome-boxes
