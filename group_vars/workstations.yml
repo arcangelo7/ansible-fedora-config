@@ -1,6 +1,23 @@
 ---
 # Variables for the workstations group
 
+# Fedora bloatware packages to remove
+fedora_bloatware:
+  - gnome-boxes
+  - gnome-contacts
+  - gnome-maps
+  - gnome-tour
+  - gnome-weather
+  - rhythmbox
+  - totem
+  - yelp
+  - gnome-calculator
+  - simple-scan
+  - gnome-connections
+  - gnome-clocks
+  - cheese
+  - snapshot
+
 # Common packages to install
 common_packages:
   - git

@@ -1,4 +1,14 @@
 ---
+# Remove Fedora bloatware
+- name: Remove Fedora bloatware
+  dnf:
+    name: "{{ fedora_bloatware }}"
+    state: absent
+  tags:
+    - system
+    - cleanup
+    - bloatware
+
 # Update the system
 - name: Update all packages
   dnf:
