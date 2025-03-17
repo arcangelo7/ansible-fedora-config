@@ -20,6 +20,8 @@ fedora_bloatware:
   - gnome-clocks
   - cheese
   - snapshot
+  - firefox-langpacks
+  - firefox
 
 # Common packages to install
 common_packages:
