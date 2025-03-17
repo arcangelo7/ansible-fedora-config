@@ -1,0 +1,22 @@
+---
+# Installa temi e icone
+- name: Installa gnome-tweaks
+  dnf:
+    name:
+      - gnome-tweaks
+    state: present
+  tags:
+    - desktop
+    - themes
+
+# Installa estensioni GNOME
+- name: Installa estensioni GNOME
+  dnf:
+    name:
+      - gnome-shell-extension-appindicator
+      - gnome-shell-extension-dash-to-dock
+      - gnome-extensions-app
+    state: present
+  tags:
+    - desktop
+    - gnome-extensions

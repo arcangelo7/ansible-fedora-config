@@ -1,0 +1,90 @@
+---
+# Installa strumenti di sviluppo
+- name: Installa strumenti di sviluppo
+  dnf:
+    name: "{{ development_packages }}"
+    state: present
+  tags:
+    - development
+    - packages
+
+# Installa Docker
+- name: Verifica se Docker è già installato
+  command: which docker
+  register: docker_check
+  changed_when: false
+  failed_when: false
+  check_mode: no  # Esegui anche in modalità check
+  tags:
+    - development
+    - docker
+
+- name: Verifica se il servizio Docker esiste
+  stat:
+    path: /usr/lib/systemd/system/docker.service
+  register: docker_service
+  check_mode: no  # Esegui anche in modalità check
+  tags:
+    - development
+    - docker
+
+- name: Verifica se il gruppo docker esiste
+  command: getent group docker
+  register: docker_group
+  changed_when: false
+  failed_when: false
+  check_mode: no  # Esegui anche in modalità check
+  tags:
+    - development
+    - docker
+
+- name: Installa dnf-plugins-core
+  dnf:
+    name: dnf-plugins-core
+    state: present
+  tags:
+    - development
+    - docker
+
+- name: Aggiungi repository Docker
+  command: dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+  when: docker_check.rc != 0
+  tags:
+    - development
+    - docker
+
+- name: Installa Docker Engine e plugin
+  dnf:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+  when: docker_check.rc != 0
+  tags:
+    - development
+    - docker
+
+- name: Abilita e avvia il servizio Docker
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  when: docker_service.stat.exists | default(false)
+  tags:
+    - development
+    - docker
+
+- name: Aggiungi utente corrente al gruppo docker
+  user:
+    name: "{{ ansible_user_id }}"
+    groups: docker
+    append: yes
+  when: docker_group.rc == 0
+  tags:
+    - development
+    - docker 

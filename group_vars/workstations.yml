@@ -1,0 +1,27 @@
+---
+# Variabili per il gruppo workstations
+
+# Pacchetti comuni da installare
+common_packages:
+  - git
+  - htop
+  - tilix
+  - wget
+  - curl
+
+# Pacchetti di sviluppo da installare
+development_packages:
+  - gcc
+  - gcc-c++
+  - make
+  - automake
+  - autoconf
+  - python3-devel
+  - python3-pip
+  - nodejs
+  - npm
+
+# Configurazione desktop
+desktop_theme: "Arc-Dark"
+desktop_icon_theme: "Papirus-Dark"
+desktop_dark_mode: true 

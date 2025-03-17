@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Arcangelo Massari
+  description: Common setup for Fedora workstations
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: Fedora
+      versions:
+        - 41
+  galaxy_tags:
+    - fedora
+    - workstation
+    - system
+
+dependencies: [] 

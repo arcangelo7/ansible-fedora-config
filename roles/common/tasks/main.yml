@@ -1,0 +1,18 @@
+---
+# Aggiorna il sistema
+- name: Aggiorna tutti i pacchetti
+  dnf:
+    name: "*"
+    state: latest
+  tags:
+    - system
+    - update
+
+# Installa pacchetti di base
+- name: Installa pacchetti di base
+  dnf:
+    name: "{{ common_packages }}"
+    state: present
+  tags:
+    - packages
+    - base-packages 

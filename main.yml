@@ -1,0 +1,11 @@
+---
+- name: Configure Fedora Workstation
+  hosts: workstations
+  become: true
+  
+  roles:
+    - common
+    - development
+    - desktop
+    # Aggiungi altri ruoli qui man mano che li crei
+    # - applications 
