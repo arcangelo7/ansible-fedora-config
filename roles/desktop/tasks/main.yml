@@ -20,3 +20,30 @@
   tags:
     - desktop
     - gnome-extensions
+
+# Installa Brave Browser da Flatpak
+- name: Assicurati che Flatpak sia installato
+  dnf:
+    name: flatpak
+    state: present
+  become: yes
+  tags:
+    - desktop
+    - browser
+    - brave
+
+- name: Aggiungi repository Flathub
+  command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  become: yes
+  tags:
+    - desktop
+    - browser
+    - brave
+
+- name: Installa Brave Browser da Flathub
+  command: flatpak install -y flathub com.brave.Browser
+  become: yes
+  tags:
+    - desktop
+    - browser
+    - brave
