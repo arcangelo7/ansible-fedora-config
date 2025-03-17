@@ -73,6 +73,7 @@ You can safely run the entire playbook or specific parts using tags whenever you
 Installs and configures basic system components:
 - System update (`tags: system, update`)
 - Base packages like git, htop, tilix, wget, curl (`tags: packages, base-packages`)
+- Removal of DNF and Flatpak bloatware packages (`tags: system, cleanup, bloatware`)
 
 ### Development
 Installs and configures development tools:
@@ -99,6 +100,8 @@ Installs and configures additional applications:
 
 You can customize the configuration by modifying the `group_vars/workstations.yml` file, which includes:
 
+- `fedora_bloatware`: List of DNF packages to remove
+- `flatpak_bloatware`: List of Flatpak applications to remove
 - `common_packages`: List of base packages to install
 - `development_packages`: List of development packages to install
 - `git_config`: Git configuration (username, email, editor)

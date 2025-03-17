@@ -10,3 +10,6 @@ appimages_dir: "/opt/appimages"
 
 # Discord Flatpak
 discord_flatpak_app_id: "com.discordapp.Discord" 
+
+# VLC Flatpak
+vlc_flatpak_app_id: "org.videolan.VLC" 

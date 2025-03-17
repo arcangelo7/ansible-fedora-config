@@ -25,4 +25,41 @@
     state: present
   tags:
     - packages
-    - base-packages 
+    - base-packages
+
+# Check if Flatpak is installed
+- name: Check if Flatpak is installed
+  command: which flatpak
+  register: flatpak_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - system
+    - cleanup
+    - bloatware
+
+# Check installed Flatpaks
+- name: Check installed Flatpak applications
+  command: flatpak list --app --columns=application
+  register: installed_flatpaks
+  changed_when: false
+  when: flatpak_check.rc == 0
+  tags:
+    - system
+    - cleanup
+    - bloatware
+
+# Remove Flatpak bloatware
+- name: Remove Flatpak bloatware
+  command: flatpak uninstall -y {{ item }}
+  with_items: "{{ flatpak_bloatware }}"
+  when: 
+    - flatpak_check.rc == 0 
+    - flatpak_bloatware is defined
+    - installed_flatpaks.stdout is defined
+    - item in installed_flatpaks.stdout
+  tags:
+    - system
+    - cleanup
+    - bloatware 

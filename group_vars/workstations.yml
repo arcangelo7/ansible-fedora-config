@@ -50,4 +50,8 @@ git_config:
 # Desktop configuration
 desktop_theme: "Arc-Dark"
 desktop_icon_theme: "Papirus-Dark"
-desktop_dark_mode: true 
+desktop_dark_mode: true
+
+# Flatpak bloatware packages to remove
+flatpak_bloatware:
+  - org.fedoraproject.MediaWriter

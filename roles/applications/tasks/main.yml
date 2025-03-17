@@ -160,4 +160,20 @@
   when: "discord_flatpak_app_id not in installed_flatpaks.stdout"
   tags:
     - applications
-    - discord 
+    - discord
+
+# Install VLC from Flathub
+- name: Check if VLC is already installed
+  command: flatpak list --app --columns=application
+  register: installed_flatpaks_vlc
+  changed_when: false
+  tags:
+    - applications
+    - vlc
+
+- name: Install VLC from Flathub
+  command: flatpak install -y flathub {{ vlc_flatpak_app_id }}
+  when: "vlc_flatpak_app_id not in installed_flatpaks_vlc.stdout"
+  tags:
+    - applications
+    - vlc 
