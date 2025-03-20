@@ -223,6 +223,186 @@
     - applications
     - cursor
 
+# Install Windsurf AI
+- name: Extract version from windsurf_tarball_url
+  set_fact:
+    new_windsurf_version: "{{ windsurf_tarball_url | regex_search('Windsurf-linux-x64-([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | first }}"
+  tags:
+    - applications
+    - windsurf
+
+- name: Check if Windsurf is already installed
+  stat:
+    path: "{{ windsurf_binary_path }}"
+  register: windsurf_check
+  tags:
+    - applications
+    - windsurf
+
+- name: Debug windsurf_tarball_url and extracted version
+  debug:
+    msg: 
+      - "URL: {{ windsurf_tarball_url }}"
+      - "Extracted version: {{ new_windsurf_version }}"
+  tags:
+    - applications
+    - windsurf
+
+- name: Check if Windsurf version metadata file exists
+  stat:
+    path: "{{ windsurf_install_dir }}/version"
+  register: windsurf_metadata_check
+  tags:
+    - applications
+    - windsurf
+
+- name: Read installed Windsurf version from metadata file
+  slurp:
+    src: "{{ windsurf_install_dir }}/version"
+  register: installed_windsurf_version_raw
+  when: windsurf_metadata_check.stat.exists
+  tags:
+    - applications
+    - windsurf
+
+- name: Set installed Windsurf version from metadata
+  set_fact:
+    installed_windsurf_version: "{{ installed_windsurf_version_raw.content | b64decode | trim }}"
+  when: windsurf_metadata_check.stat.exists and installed_windsurf_version_raw is success
+  tags:
+    - applications
+    - windsurf
+
+- name: Set default version for Windsurf if no metadata exists
+  set_fact:
+    installed_windsurf_version: "0.0.0"
+  when: not windsurf_metadata_check.stat.exists
+  tags:
+    - applications
+    - windsurf
+
+- name: Debug Windsurf version comparison
+  debug:
+    msg:
+      - "Installed Windsurf version: {{ installed_windsurf_version | default('unknown') }}"
+      - "New Windsurf version: {{ new_windsurf_version }}"
+  tags:
+    - applications
+    - windsurf
+
+- name: Set Windsurf version check result
+  set_fact:
+    windsurf_needs_update: "{{ not windsurf_check.stat.exists or installed_windsurf_version != new_windsurf_version }}"
+  tags:
+    - applications
+    - windsurf
+
+- name: Debug Windsurf update decision
+  debug:
+    msg: "Windsurf needs update: {{ windsurf_needs_update }}"
+  tags:
+    - applications
+    - windsurf
+
+- name: Create Windsurf installation directory
+  file:
+    path: "{{ windsurf_install_dir }}"
+    state: directory
+    mode: '0755'
+  when: windsurf_needs_update
+  tags:
+    - applications
+    - windsurf
+
+- name: Download Windsurf tarball
+  get_url:
+    url: "{{ windsurf_tarball_url }}"
+    dest: "{{ windsurf_install_dir }}/windsurf.tar.gz"
+    mode: '0644'
+  when: windsurf_needs_update
+  tags:
+    - applications
+    - windsurf
+
+- name: Extract Windsurf tarball
+  unarchive:
+    src: "{{ windsurf_install_dir }}/windsurf.tar.gz"
+    dest: "{{ windsurf_install_dir }}"
+    remote_src: yes
+  when: windsurf_needs_update
+  tags:
+    - applications
+    - windsurf
+
+- name: Remove tarball after extraction
+  file:
+    path: "{{ windsurf_install_dir }}/windsurf.tar.gz"
+    state: absent
+  when: windsurf_needs_update
+  tags:
+    - applications
+    - windsurf
+
+- name: Save new Windsurf version to metadata file
+  copy:
+    content: "{{ new_windsurf_version }}"
+    dest: "{{ windsurf_install_dir }}/version"
+    mode: '0644'
+  when: windsurf_needs_update
+  tags:
+    - applications
+    - windsurf
+
+- name: Create icons directory for Windsurf
+  file:
+    path: "{{ windsurf_icon_dest | dirname }}"
+    state: directory
+    mode: '0755'
+  when: windsurf_needs_update
+  tags:
+    - applications
+    - windsurf
+
+- name: Copy Windsurf icon
+  copy:
+    src: "{{ windsurf_install_dir }}/Windsurf/resources/app/resources/linux/code.png"
+    dest: "{{ windsurf_icon_dest }}"
+    mode: '0644'
+    remote_src: yes
+  when: windsurf_needs_update
+  tags:
+    - applications
+    - windsurf
+
+- name: Create desktop entry for Windsurf
+  template:
+    src: windsurf.desktop.j2
+    dest: "{{ windsurf_desktop_entry_dest }}"
+    mode: '0644'
+  when: windsurf_needs_update
+  tags:
+    - applications
+    - windsurf
+
+- name: Check if Windsurf is in PATH
+  stat:
+    path: "{{ bin_dir | default('/usr/local/bin') }}/windsurf"
+  register: windsurf_in_path
+  tags:
+    - applications
+    - windsurf
+
+- name: Create symbolic link to Windsurf in PATH
+  file:
+    src: "{{ windsurf_binary_path }}"
+    dest: "{{ bin_dir | default('/usr/local/bin') }}/windsurf"
+    state: link
+  become: true
+  when: not windsurf_in_path.stat.exists or windsurf_needs_update
+  tags:
+    - applications
+    - windsurf
+
 # Install Discord from Flathub
 - name: Check if Flathub is enabled
   command: flatpak remotes --columns=name
