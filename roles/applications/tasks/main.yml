@@ -8,10 +8,92 @@
     - applications
     - cursor
 
+- name: Check if Cursor version metadata file exists
+  stat:
+    path: "{{ cursor_metadata_file }}"
+  register: cursor_metadata_check
+  tags:
+    - applications
+    - cursor
+
+- name: Extract version from cursor_appimage_url
+  set_fact:
+    new_cursor_version: "{{ cursor_appimage_url | regex_search('Cursor-([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | first }}"
+  tags:
+    - applications
+    - cursor
+
+- name: Debug cursor_appimage_url and extracted version
+  debug:
+    msg: 
+      - "URL: {{ cursor_appimage_url }}"
+      - "Extracted version: {{ new_cursor_version }}"
+  tags:
+    - applications
+    - cursor
+
+- name: Read installed Cursor version from metadata file
+  slurp:
+    src: "{{ cursor_metadata_file }}"
+  register: installed_cursor_version_raw
+  when: cursor_metadata_check.stat.exists
+  tags:
+    - applications
+    - cursor
+
+- name: Set installed Cursor version from metadata
+  set_fact:
+    installed_cursor_version: "{{ installed_cursor_version_raw.content | b64decode | trim }}"
+  when: cursor_metadata_check.stat.exists and installed_cursor_version_raw is success
+  tags:
+    - applications
+    - cursor
+
+- name: Set default version for Cursor if no metadata exists
+  set_fact:
+    installed_cursor_version: "0.0.0"
+  when: not cursor_metadata_check.stat.exists
+  tags:
+    - applications
+    - cursor
+
+- name: Debug version comparison
+  debug:
+    msg:
+      - "Installed Cursor version: {{ installed_cursor_version | default('unknown') }}"
+      - "New Cursor version: {{ new_cursor_version }}"
+  tags:
+    - applications
+    - cursor
+
+- name: Set version check result
+  set_fact:
+    cursor_needs_update: "{{ not cursor_appimage_check.stat.exists or installed_cursor_version != new_cursor_version }}"
+  tags:
+    - applications
+    - cursor
+
+- name: Debug update decision
+  debug:
+    msg: "Cursor needs update: {{ cursor_needs_update }}"
+  tags:
+    - applications
+    - cursor
+
 - name: Check if Cursor is in PATH
   stat:
     path: "{{ bin_dir | default('/usr/local/bin') }}/cursor"
   register: cursor_in_path
+  tags:
+    - applications
+    - cursor
+
+# Remove old Cursor version if a different version is being installed
+- name: Remove old Cursor AppImage if version is different
+  file:
+    path: "{{ cursor_appimage_dest }}"
+    state: absent
+  when: cursor_appimage_check.stat.exists and cursor_needs_update
   tags:
     - applications
     - cursor
@@ -22,7 +104,7 @@
     path: "{{ appimages_dir }}"
     state: directory
     mode: '0755'
-  when: not cursor_appimage_check.stat.exists or not cursor_in_path.stat.exists
+  when: cursor_needs_update or not cursor_in_path.stat.exists
   tags:
     - applications
     - cursor
@@ -32,7 +114,17 @@
     url: "{{ cursor_appimage_url }}"
     dest: "{{ cursor_appimage_dest }}"
     mode: '0755'
-  when: not cursor_appimage_check.stat.exists
+  when: cursor_needs_update
+  tags:
+    - applications
+    - cursor
+
+- name: Save new Cursor version to metadata file
+  copy:
+    content: "{{ new_cursor_version }}"
+    dest: "{{ cursor_metadata_file }}"
+    mode: '0644'
+  when: cursor_needs_update
   tags:
     - applications
     - cursor
@@ -42,7 +134,7 @@
     path: /tmp/cursor-extract
     state: directory
     mode: '0755'
-  when: not cursor_appimage_check.stat.exists
+  when: cursor_needs_update
   tags:
     - applications
     - cursor
@@ -52,7 +144,7 @@
   args:
     chdir: /tmp/cursor-extract
     creates: /tmp/cursor-extract/squashfs-root
-  when: not cursor_appimage_check.stat.exists
+  when: cursor_needs_update
   tags:
     - applications
     - cursor
@@ -63,7 +155,7 @@
     patterns: "*.png,*.svg,*.ico"
     recurse: yes
   register: icon_files
-  when: not cursor_appimage_check.stat.exists
+  when: cursor_needs_update
   tags:
     - applications
     - cursor
@@ -73,7 +165,7 @@
     path: "{{ cursor_icon_dest | dirname }}"
     state: directory
     mode: '0755'
-  when: not cursor_appimage_check.stat.exists
+  when: cursor_needs_update
   tags:
     - applications
     - cursor
@@ -84,7 +176,7 @@
     dest: "{{ cursor_icon_dest }}"
     mode: '0644'
     remote_src: yes
-  when: not cursor_appimage_check.stat.exists and icon_files.files | length > 0
+  when: cursor_needs_update and icon_files.files | length > 0
   tags:
     - applications
     - cursor
@@ -94,7 +186,7 @@
     src: cursor.desktop.j2
     dest: "{{ cursor_desktop_entry_dest }}"
     mode: '0644'
-  when: not cursor_appimage_check.stat.exists
+  when: cursor_needs_update
   tags:
     - applications
     - cursor
@@ -117,7 +209,7 @@
     dest: "{{ bin_dir | default('/usr/local/bin') }}/cursor"
     state: link
   become: true
-  when: not cursor_in_path.stat.exists
+  when: not cursor_in_path.stat.exists or cursor_needs_update
   tags:
     - applications
     - cursor
@@ -126,7 +218,7 @@
   file:
     path: /tmp/cursor-extract
     state: absent
-  when: not cursor_appimage_check.stat.exists
+  when: cursor_needs_update
   tags:
     - applications
     - cursor
