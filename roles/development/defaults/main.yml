@@ -1,0 +1,19 @@
+---
+# Default variables for development role
+
+# Cursor AppImage
+cursor_appimage_url: "https://downloads.cursor.com/production/82ef0f61c01d079d1b7e5ab04d88499d5af500e3/linux/x64/Cursor-0.47.8-82ef0f61c01d079d1b7e5ab04d88499d5af500e3.deb.glibc2.25-x86_64.AppImage"
+cursor_appimage_dest: "/opt/appimages/Cursor.AppImage"
+cursor_icon_dest: "/usr/share/icons/hicolor/256x256/apps/cursor.png"
+cursor_desktop_entry_dest: "/usr/share/applications/cursor.desktop"
+cursor_metadata_file: "/opt/appimages/cursor.version"
+appimages_dir: "/opt/appimages" 
+
+# Windsurf AI
+windsurf_tarball_url: "https://windsurf-stable.codeiumdata.com/linux-x64/stable/164066c0badcfdea724847b1a24fd88eb96f9510/Windsurf-linux-x64-1.5.6.tar.gz"
+windsurf_install_dir: "/opt/windsurf"
+windsurf_binary_path: "{{ windsurf_install_dir }}/Windsurf/windsurf"
+windsurf_icon_dest: "/usr/share/icons/hicolor/256x256/apps/windsurf.png"
+windsurf_desktop_entry_dest: "/usr/share/applications/windsurf.desktop"
+windsurf_metadata_file: "{{ windsurf_install_dir }}/windsurf.version"
+windsurf_tarball_dest: "/tmp/windsurf.tar.gz" 
