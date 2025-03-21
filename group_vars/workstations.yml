@@ -43,6 +43,7 @@ development_packages:
   - nodejs
   - npm
   - nano
+  - gh
 
 # Git configuration
 git_config:

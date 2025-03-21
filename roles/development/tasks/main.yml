@@ -1,5 +1,17 @@
 ---
 # Install development tools
+
+# Add GitHub CLI repository
+- name: Add GitHub CLI repository
+  command: dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/rpm/gh-cli.repo
+  args:
+    creates: /etc/yum.repos.d/gh-cli.repo
+  tags:
+    - development
+    - packages
+    - github-cli
+
+# Install development tools
 - name: Install development tools
   dnf:
     name: "{{ development_packages }}"
