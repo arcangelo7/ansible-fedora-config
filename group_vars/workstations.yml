@@ -30,6 +30,7 @@ common_packages:
   - tilix
   - wget
   - curl
+  - hw-probe
 
 # Development packages to install
 development_packages:
