@@ -647,6 +647,65 @@
     - development
     - windsurf
 
+# Use the specific Windsurf icon
+- name: Check if Windsurf icon exists at the specific path
+  stat:
+    path: "{{ windsurf_install_dir }}/Windsurf/resources/app/resources/linux/code.png"
+  register: windsurf_specific_icon
+  when: windsurf_needs_update
+  tags:
+    - development
+    - windsurf
+
+- name: Debug Windsurf icon path
+  debug:
+    msg: "Windsurf icon exists at specific path: {{ windsurf_specific_icon.stat.exists }}"
+  when: windsurf_needs_update
+  tags:
+    - development
+    - windsurf
+
+- name: Create icons directory if it doesn't exist
+  file:
+    path: "{{ windsurf_icon_dest | dirname }}"
+    state: directory
+    mode: '0755'
+  when: windsurf_needs_update
+  tags:
+    - development
+    - windsurf
+
+- name: Verify Windsurf icon exists
+  assert:
+    that: windsurf_specific_icon.stat.exists
+    fail_msg: "Windsurf icon not found at {{ windsurf_install_dir }}/Windsurf/resources/app/resources/linux/code.png. Installation cannot continue."
+    success_msg: "Windsurf icon found successfully."
+  when: windsurf_needs_update
+  tags:
+    - development
+    - windsurf
+
+- name: Copy Windsurf icon to system icons directory
+  copy:
+    src: "{{ windsurf_install_dir }}/Windsurf/resources/app/resources/linux/code.png"
+    dest: "{{ windsurf_icon_dest }}"
+    mode: '0644'
+    remote_src: yes
+  when: windsurf_needs_update
+  tags:
+    - development
+    - windsurf
+
+- name: Create desktop entry for Windsurf
+  template:
+    src: windsurf.desktop.j2
+    dest: "{{ windsurf_desktop_entry_dest }}"
+    mode: '0644'
+  when: windsurf_needs_update
+  tags:
+    - development
+    - windsurf
+
 - name: Save new Windsurf version to metadata file
   copy:
     content: "{{ new_windsurf_version }}"
@@ -676,4 +735,4 @@
   when: windsurf_needs_update
   tags:
     - development
-    - windsurf 
+    - windsurf
