@@ -6,3 +6,6 @@ discord_flatpak_app_id: "com.discordapp.Discord"
 
 # VLC Flatpak
 vlc_flatpak_app_id: "org.videolan.VLC" 
+
+# Btrfs Assistant
+btrfs_assistant_package_name: "btrfs-assistant"

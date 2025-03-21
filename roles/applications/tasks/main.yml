@@ -49,6 +49,15 @@
   tags:
     - applications
     - vpn
+
+# Install Btrfs Assistant
+- name: Install Btrfs Assistant package
+  dnf:
+    name: "{{ btrfs_assistant_package_name }}"
+    state: present
+  tags:
+    - applications
+    - btrfs
     - openfortivpn
 
 # Add VPN alias to user's .bashrc
