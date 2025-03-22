@@ -748,3 +748,89 @@
   tags:
     - development
     - windsurf
+
+# Flutter SDK installation
+- name: Create development directory
+  file:
+    path: "/home/{{ local_user }}/development"
+    state: directory
+    mode: '0755'
+    owner: "{{ local_user }}"
+    group: "{{ local_user }}"
+  tags:
+    - development
+    - flutter
+
+- name: Check if Flutter is already installed
+  stat:
+    path: "/home/{{ local_user }}/development/flutter"
+  register: flutter_installed
+  tags:
+    - development
+    - flutter
+
+- name: Download Flutter SDK tarball
+  get_url:
+    url: "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.29.2-stable.tar.xz"
+    dest: "/tmp/flutter_linux_3.29.2-stable.tar.xz"
+    mode: '0644'
+  when: not flutter_installed.stat.exists
+  tags:
+    - development
+    - flutter
+
+- name: Extract Flutter SDK
+  unarchive:
+    src: "/tmp/flutter_linux_3.29.2-stable.tar.xz"
+    dest: "/home/{{ local_user }}/development/"
+    remote_src: yes
+    owner: "{{ local_user }}"
+    group: "{{ local_user }}"
+  when: not flutter_installed.stat.exists
+  tags:
+    - development
+    - flutter
+
+- name: Add Flutter to PATH in .bashrc
+  lineinfile:
+    path: "/home/{{ local_user }}/.bashrc"
+    line: 'export PATH="$PATH:/home/{{ local_user }}/development/flutter/bin"'
+    state: present
+    regexp: 'export PATH="\$PATH:/home/{{ local_user }}/development/flutter/bin"'
+  tags:
+    - development
+    - flutter
+
+# Clean up Flutter tarball
+- name: Clean up Flutter tarball
+  file:
+    path: "/tmp/flutter_linux_3.29.2-stable.tar.xz"
+    state: absent
+  when: not flutter_installed.stat.exists
+  tags:
+    - development
+    - flutter
+
+# Configure Flutter settings
+- name: Disable Flutter analytics
+  become_user: "{{ local_user }}"
+  shell: |
+    ~/development/flutter/bin/flutter config --no-analytics
+  tags:
+    - development
+    - flutter
+
+# Install required Linux dependencies for Flutter development
+- name: Install Flutter Linux development dependencies
+  dnf:
+    name:
+      - clang
+      - cmake
+      - ninja-build
+      - pkg-config
+      - gtk3-devel
+      - libstdc++-devel
+    state: present
+  tags:
+    - development
+    - flutter
