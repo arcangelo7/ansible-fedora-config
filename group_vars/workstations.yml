@@ -26,6 +26,7 @@ fedora_bloatware:
   - abrt-gui
   - abrt-desktop
   - gnome-abrt
+  - ptyxis
 
 # Common packages to install
 common_packages:
