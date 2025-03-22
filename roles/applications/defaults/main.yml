@@ -7,5 +7,8 @@ discord_flatpak_app_id: "com.discordapp.Discord"
 # VLC Flatpak
 vlc_flatpak_app_id: "org.videolan.VLC" 
 
+# Drawing Flatpak
+drawing_flatpak_app_id: "com.github.maoschanz.drawing"
+
 # Btrfs Assistant
 btrfs_assistant_package_name: "btrfs-assistant"

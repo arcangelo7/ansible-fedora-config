@@ -41,6 +41,15 @@
     - applications
     - vlc
 
+# Install Drawing Flatpak
+- name: Install Drawing Flatpak
+  community.general.flatpak:
+    name: "{{ drawing_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - drawing
+
 # Install openfortivpn
 - name: Install openfortivpn package
   dnf:

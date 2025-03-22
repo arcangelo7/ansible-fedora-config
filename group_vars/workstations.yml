@@ -22,6 +22,10 @@ fedora_bloatware:
   - snapshot
   - firefox-langpacks
   - firefox
+  - loupe
+  - abrt-gui
+  - abrt-desktop
+  - gnome-abrt
 
 # Common packages to install
 common_packages:
@@ -31,6 +35,7 @@ common_packages:
   - wget
   - curl
   - hw-probe
+  - knock
 
 # Development packages to install
 development_packages:
