@@ -15,3 +15,7 @@ joplin_flatpak_app_id: "net.cozic.joplin_desktop"
 
 # Btrfs Assistant
 btrfs_assistant_package_name: "btrfs-assistant"
+
+# Google Chrome
+google_chrome_repo_url: "https://dl.google.com/linux/chrome/rpm/stable/x86_64"
+google_chrome_package_name: "google-chrome-stable"

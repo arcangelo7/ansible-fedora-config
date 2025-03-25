@@ -830,6 +830,7 @@
       - pkg-config
       - gtk3-devel
       - libstdc++-devel
+      - lcov
     state: present
   tags:
     - development
