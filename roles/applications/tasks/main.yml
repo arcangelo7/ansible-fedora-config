@@ -79,6 +79,16 @@
     - applications
     - joplin-cli
 
+# Install Jimmy CLI
+- name: Download Jimmy CLI
+  get_url:
+    url: "{{ jimmy_download_url }}"
+    dest: "{{ jimmy_install_path }}"
+    mode: '0755'
+  tags:
+    - applications
+    - jimmy-cli
+
 # Install openfortivpn
 - name: Install openfortivpn package
   dnf:

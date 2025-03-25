@@ -16,6 +16,10 @@ joplin_flatpak_app_id: "net.cozic.joplin_desktop"
 # Joplin CLI
 joplin_cli_package_name: "joplin-cli"
 
+# Jimmy CLI
+jimmy_download_url: "https://github.com/marph91/jimmy/releases/latest/download/jimmy-cli-linux"
+jimmy_install_path: "/usr/local/bin/jimmy"
+
 # Btrfs Assistant
 btrfs_assistant_package_name: "btrfs-assistant"
 
