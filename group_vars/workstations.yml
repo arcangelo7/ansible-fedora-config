@@ -27,6 +27,9 @@ fedora_bloatware:
   - abrt-desktop
   - gnome-abrt
   - ptyxis
+  - gnome-calendar
+  - gnome-text-editor
+  - mediawriter
 
 # Common packages to install
 common_packages:
