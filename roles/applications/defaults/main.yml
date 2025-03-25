@@ -13,6 +13,9 @@ drawing_flatpak_app_id: "com.github.maoschanz.drawing"
 # Joplin Flatpak
 joplin_flatpak_app_id: "net.cozic.joplin_desktop"
 
+# Joplin CLI
+joplin_cli_package_name: "joplin-cli"
+
 # Btrfs Assistant
 btrfs_assistant_package_name: "btrfs-assistant"
 

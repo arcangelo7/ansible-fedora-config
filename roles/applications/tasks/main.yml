@@ -59,6 +59,26 @@
     - applications
     - joplin
 
+# Install Joplin CLI (terminal version)
+- name: Install Node.js and npm (required for Joplin CLI)
+  dnf:
+    name: 
+      - nodejs
+      - npm
+    state: present
+  tags:
+    - applications
+    - joplin-cli
+
+- name: Install Joplin CLI globally with npm
+  npm:
+    name: joplin
+    global: yes
+    state: present
+  tags:
+    - applications
+    - joplin-cli
+
 # Install openfortivpn
 - name: Install openfortivpn package
   dnf:
