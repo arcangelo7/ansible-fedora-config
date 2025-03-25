@@ -50,6 +50,15 @@
     - applications
     - drawing
 
+# Install Joplin Flatpak
+- name: Install Joplin Flatpak
+  community.general.flatpak:
+    name: "{{ joplin_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - joplin
+
 # Install openfortivpn
 - name: Install openfortivpn package
   dnf:

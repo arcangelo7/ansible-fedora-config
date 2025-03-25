@@ -10,5 +10,8 @@ vlc_flatpak_app_id: "org.videolan.VLC"
 # Drawing Flatpak
 drawing_flatpak_app_id: "com.github.maoschanz.drawing"
 
+# Joplin Flatpak
+joplin_flatpak_app_id: "net.cozic.joplin_desktop"
+
 # Btrfs Assistant
 btrfs_assistant_package_name: "btrfs-assistant"

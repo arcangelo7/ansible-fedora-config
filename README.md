@@ -105,8 +105,5 @@ You can customize the configuration by modifying the `group_vars/workstations.ym
 - `common_packages`: List of base packages to install
 - `development_packages`: List of development packages to install
 - `git_config`: Git configuration (username, email, editor)
-- `desktop_theme`: Default desktop theme
-- `desktop_icon_theme`: Default icon theme
-- `desktop_dark_mode`: Dark mode activation
 
 Additionally, you can modify the specific settings for each role in their respective `defaults/main.yml` files. 
