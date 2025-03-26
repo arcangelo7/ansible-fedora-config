@@ -50,11 +50,227 @@
     - applications
     - drawing
 
-# Install Joplin Flatpak
-- name: Install Joplin Flatpak
-  community.general.flatpak:
-    name: "{{ joplin_flatpak_app_id }}"
-    state: present
+# Install Joplin AppImage
+# Check if Joplin is already installed
+- name: Check if Joplin AppImage exists
+  stat:
+    path: "{{ joplin_appimage_dest }}"
+  register: joplin_appimage_check
+  tags:
+    - applications
+    - joplin
+
+- name: Check if Joplin version metadata file exists
+  stat:
+    path: "{{ joplin_metadata_file }}"
+  register: joplin_metadata_check
+  tags:
+    - applications
+    - joplin
+
+- name: Extract version from joplin_appimage_url
+  set_fact:
+    new_joplin_version: "{{ joplin_appimage_url | regex_search('Joplin-([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | first }}"
+  tags:
+    - applications
+    - joplin
+
+- name: Debug joplin_appimage_url and extracted version
+  debug:
+    msg: 
+      - "URL: {{ joplin_appimage_url }}"
+      - "Extracted version: {{ new_joplin_version }}"
+  tags:
+    - applications
+    - joplin
+
+- name: Read installed Joplin version from metadata file
+  slurp:
+    src: "{{ joplin_metadata_file }}"
+  register: installed_joplin_version_raw
+  when: joplin_metadata_check.stat.exists
+  tags:
+    - applications
+    - joplin
+
+- name: Set installed Joplin version from metadata
+  set_fact:
+    installed_joplin_version: "{{ installed_joplin_version_raw.content | b64decode | trim }}"
+  when: joplin_metadata_check.stat.exists and installed_joplin_version_raw is success
+  tags:
+    - applications
+    - joplin
+
+- name: Set default version for Joplin if no metadata exists
+  set_fact:
+    installed_joplin_version: "0.0.0"
+  when: not joplin_metadata_check.stat.exists
+  tags:
+    - applications
+    - joplin
+
+- name: Debug version comparison
+  debug:
+    msg:
+      - "Installed Joplin version: {{ installed_joplin_version | default('unknown') }}"
+      - "New Joplin version: {{ new_joplin_version }}"
+  tags:
+    - applications
+    - joplin
+
+- name: Set version check result
+  set_fact:
+    joplin_needs_update: "{{ not joplin_appimage_check.stat.exists or installed_joplin_version != new_joplin_version }}"
+  tags:
+    - applications
+    - joplin
+
+- name: Debug update decision
+  debug:
+    msg: "Joplin needs update: {{ joplin_needs_update }}"
+  tags:
+    - applications
+    - joplin
+
+- name: Check if Joplin is in PATH
+  stat:
+    path: "{{ bin_dir | default('/usr/local/bin') }}/joplin-gui"
+  register: joplin_in_path
+  tags:
+    - applications
+    - joplin
+
+# Remove old Joplin version if a different version is being installed
+- name: Remove old Joplin AppImage if version is different
+  file:
+    path: "{{ joplin_appimage_dest }}"
+    state: absent
+  when: joplin_appimage_check.stat.exists and joplin_needs_update
+  tags:
+    - applications
+    - joplin
+
+# Install Joplin AppImage
+- name: Create directory for AppImages
+  file:
+    path: "{{ appimages_dir }}"
+    state: directory
+    mode: '0755'
+  when: joplin_needs_update or not joplin_in_path.stat.exists
+  tags:
+    - applications
+    - joplin
+
+- name: Download Joplin AppImage
+  get_url:
+    url: "{{ joplin_appimage_url }}"
+    dest: "{{ joplin_appimage_dest }}"
+    mode: '0755'
+  when: joplin_needs_update
+  tags:
+    - applications
+    - joplin
+
+- name: Save new Joplin version to metadata file
+  copy:
+    content: "{{ new_joplin_version }}"
+    dest: "{{ joplin_metadata_file }}"
+    mode: '0644'
+  when: joplin_needs_update
+  tags:
+    - applications
+    - joplin
+
+- name: Create temporary directory for AppImage extraction
+  file:
+    path: /tmp/joplin-extract
+    state: directory
+    mode: '0755'
+  when: joplin_needs_update
+  tags:
+    - applications
+    - joplin
+
+- name: Extract AppImage to get icon
+  command: "{{ joplin_appimage_dest }} --appimage-extract"
+  args:
+    chdir: /tmp/joplin-extract
+    creates: /tmp/joplin-extract/squashfs-root
+  when: joplin_needs_update
+  tags:
+    - applications
+    - joplin
+
+- name: Find icon file
+  find:
+    paths: /tmp/joplin-extract/squashfs-root
+    patterns: "*.png,*.svg,*.ico"
+    recurse: yes
+  register: icon_files
+  when: joplin_needs_update
+  tags:
+    - applications
+    - joplin
+
+- name: Create icons directory if it doesn't exist
+  file:
+    path: "{{ joplin_icon_dest | dirname }}"
+    state: directory
+    mode: '0755'
+  when: joplin_needs_update
+  tags:
+    - applications
+    - joplin
+
+- name: Copy icon to system icons directory
+  copy:
+    src: "{{ icon_files.files[0].path }}"
+    dest: "{{ joplin_icon_dest }}"
+    mode: '0644'
+    remote_src: yes
+  when: joplin_needs_update and icon_files.files | length > 0
+  tags:
+    - applications
+    - joplin
+
+- name: Create desktop entry for Joplin
+  template:
+    src: joplin.desktop.j2
+    dest: "{{ joplin_desktop_entry_dest }}"
+    mode: '0644'
+  when: joplin_needs_update
+  tags:
+    - applications
+    - joplin
+
+# Add Joplin to PATH
+- name: Create bin directory if it doesn't exist
+  file:
+    path: "{{ bin_dir | default('/usr/local/bin') }}"
+    state: directory
+    mode: '0755'
+  become: true
+  when: not joplin_in_path.stat.exists
+  tags:
+    - applications
+    - joplin
+
+- name: Create symbolic link to Joplin in PATH
+  file:
+    src: "{{ joplin_appimage_dest }}"
+    dest: "{{ bin_dir | default('/usr/local/bin') }}/joplin-gui"
+    state: link
+  become: true
+  when: not joplin_in_path.stat.exists or joplin_needs_update
+  tags:
+    - applications
+    - joplin
+
+- name: Clean up temporary extraction directory
+  file:
+    path: /tmp/joplin-extract
+    state: absent
+  when: joplin_needs_update
   tags:
     - applications
     - joplin
@@ -78,6 +294,153 @@
   tags:
     - applications
     - joplin-cli
+
+# Configure Joplin CLI sync - Approccio basato su file di stato
+- name: Check if Joplin CLI configuration state file exists
+  stat:
+    path: "/home/{{ local_user }}/.joplin-cli-state.json"
+  register: joplin_config_state
+  become: false
+  become_user: "{{ local_user }}"
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Create Joplin CLI configuration state file if it doesn't exist
+  copy:
+    content: '{}'
+    dest: "/home/{{ local_user }}/.joplin-cli-state.json"
+    mode: '0644'
+  become: false
+  become_user: "{{ local_user }}"
+  when: not joplin_config_state.stat.exists
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Read Joplin CLI configuration state file
+  slurp:
+    src: "/home/{{ local_user }}/.joplin-cli-state.json"
+  register: joplin_config_state_content
+  become: false
+  become_user: "{{ local_user }}"
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Parse Joplin CLI configuration state
+  set_fact:
+    joplin_config_state_json: "{{ joplin_config_state_content['content'] | b64decode | from_json }}"
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Debug Joplin CLI configuration state
+  debug:
+    msg: "Joplin CLI configuration state: {{ joplin_config_state_json }}"
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Configure Joplin CLI sync target
+  command: joplin config sync.target {{ joplin_sync_target }}
+  become: false
+  become_user: "{{ local_user }}"
+  register: joplin_sync_target_result
+  changed_when: joplin_sync_target_result.rc == 0
+  failed_when: joplin_sync_target_result.rc != 0
+  when: joplin_config_state_json.sync_target is not defined or joplin_config_state_json.sync_target != joplin_sync_target|string
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Configure Joplin CLI WebDAV path
+  command: joplin config sync.5.path {{ joplin_sync_webdav_path }}
+  become: false
+  become_user: "{{ local_user }}"
+  register: joplin_sync_path_result
+  changed_when: joplin_sync_path_result.rc == 0
+  failed_when: joplin_sync_path_result.rc != 0
+  when: joplin_config_state_json.webdav_path is not defined or joplin_config_state_json.webdav_path != joplin_sync_webdav_path
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Configure Joplin CLI WebDAV username
+  command: joplin config sync.5.username {{ joplin_sync_webdav_username }}
+  become: false
+  become_user: "{{ local_user }}"
+  register: joplin_sync_username_result
+  changed_when: joplin_sync_username_result.rc == 0
+  failed_when: joplin_sync_username_result.rc != 0
+  when: joplin_config_state_json.webdav_username is not defined or joplin_config_state_json.webdav_username != joplin_sync_webdav_username
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Configure Joplin CLI WebDAV password
+  command: joplin config sync.5.password {{ joplin_sync_webdav_password }}
+  become: false
+  become_user: "{{ local_user }}"
+  register: joplin_sync_password_result
+  changed_when: joplin_sync_password_result.rc == 0
+  failed_when: joplin_sync_password_result.rc != 0
+  when: 
+    - joplin_sync_webdav_password != ""
+    - joplin_config_state_json.webdav_password_set is not defined or joplin_config_state_json.webdav_password_set != true
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+  no_log: true
+
+- name: Update Joplin CLI configuration state file
+  copy:
+    content: "{{ updated_joplin_config_state | to_nice_json }}"
+    dest: "/home/{{ local_user }}/.joplin-cli-state.json"
+    mode: '0644'
+  become: false
+  become_user: "{{ local_user }}"
+  vars:
+    updated_joplin_config_state:
+      sync_target: "{{ joplin_sync_target|string }}"
+      webdav_path: "{{ joplin_sync_webdav_path }}"
+      webdav_username: "{{ joplin_sync_webdav_username }}"
+      webdav_password_set: true
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+# Esegui la sincronizzazione iniziale di Joplin
+- name: Esegui la sincronizzazione di Joplin CLI
+  command: joplin sync
+  become: false
+  become_user: "{{ local_user }}"
+  register: joplin_sync_result
+  changed_when: joplin_sync_result.rc == 0
+  failed_when: false  # Non fallire se la sincronizzazione non riesce
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Mostra il risultato della sincronizzazione
+  debug:
+    msg: "Risultato sincronizzazione: {{ joplin_sync_result.stdout }}"
+  when: joplin_sync_result.stdout is defined
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
 
 # Install Jimmy CLI
 - name: Download Jimmy CLI

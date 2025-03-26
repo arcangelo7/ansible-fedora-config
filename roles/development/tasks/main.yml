@@ -812,10 +812,22 @@
     - flutter
 
 # Configure Flutter settings
+- name: Check Flutter analytics status
+  become_user: "{{ local_user }}"
+  shell: |
+    ~/development/flutter/bin/flutter config
+  register: flutter_config
+  changed_when: false
+  check_mode: no
+  tags:
+    - development
+    - flutter
+
 - name: Disable Flutter analytics
   become_user: "{{ local_user }}"
   shell: |
     ~/development/flutter/bin/flutter config --no-analytics
+  when: flutter_config.stdout is defined and "Analytics reporting is currently disabled" not in flutter_config.stdout
   tags:
     - development
     - flutter

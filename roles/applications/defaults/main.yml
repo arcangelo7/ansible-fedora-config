@@ -10,11 +10,20 @@ vlc_flatpak_app_id: "org.videolan.VLC"
 # Drawing Flatpak
 drawing_flatpak_app_id: "com.github.maoschanz.drawing"
 
-# Joplin Flatpak
-joplin_flatpak_app_id: "net.cozic.joplin_desktop"
+# Joplin AppImage
+joplin_appimage_url: "https://github.com/laurent22/joplin/releases/download/v3.2.13/Joplin-3.2.13.AppImage"
+joplin_appimage_dest: "/opt/appimages/Joplin.AppImage"
+joplin_icon_dest: "/usr/share/icons/hicolor/256x256/apps/joplin.png"
+joplin_desktop_entry_dest: "/usr/share/applications/joplin.desktop"
+joplin_metadata_file: "/opt/appimages/joplin.version"
+appimages_dir: "/opt/appimages"
+bin_dir: "/usr/local/bin"
 
-# Joplin CLI
-joplin_cli_package_name: "joplin-cli"
+# Joplin CLI - Sincronizzazione
+joplin_sync_target: 5  # 5 per WebDAV
+joplin_sync_webdav_path: "https://cloud-arcangelo.duckdns.org/remote.php/dav/files/arcangelo/Documents/Joplin/"
+joplin_sync_webdav_username: "arcangelo"
+joplin_sync_webdav_password: "{{ vault_joplin_webdav_password | default('') }}"  # Da definire in vault
 
 # Jimmy CLI
 jimmy_download_url: "https://github.com/marph91/jimmy/releases/latest/download/jimmy-cli-linux"
