@@ -86,10 +86,15 @@ Installs and configures development tools:
 Configures the GNOME desktop environment:
 - Themes and icons with gnome-tweaks (`tags: desktop, themes`)
 - GNOME extensions like dash-to-dock and appindicator (`tags: desktop, gnome-extensions`)
-- Brave Browser via Flatpak (`tags: desktop, browser, brave`)
+- Flatpak for application management (`tags: desktop, browser`)
 
 ### Applications
 Installs and configures additional applications:
+- Firefox via Flatpak (`tags: applications, firefox`)
+- Discord via Flatpak (`tags: applications, discord`)
+- VLC via Flatpak (`tags: applications, vlc`)
+- Drawing via Flatpak (`tags: applications, drawing`)
+- Zoom via Flatpak (`tags: applications, zoom`)
 - Cursor (AI-first code editor) as AppImage (`tags: applications, cursor`)
   - Downloads the AppImage to `/opt/appimages/`
   - Extracts the icon from the AppImage

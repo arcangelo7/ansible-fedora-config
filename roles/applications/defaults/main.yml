@@ -4,6 +4,9 @@
 # Discord Flatpak
 discord_flatpak_app_id: "com.discordapp.Discord" 
 
+# Firefox Flatpak
+firefox_flatpak_app_id: "org.mozilla.firefox"
+
 # VLC Flatpak
 vlc_flatpak_app_id: "org.videolan.VLC" 
 

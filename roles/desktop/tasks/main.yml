@@ -55,9 +55,8 @@
   tags:
     - desktop
     - browser
-    - brave
 
-# Install Brave Browser from Flatpak
+# Install Flatpak
 - name: Ensure Flatpak is installed
   dnf:
     name: flatpak
@@ -67,7 +66,6 @@
   tags:
     - desktop
     - browser
-    - brave
 
 # Check if Flathub repository is already added
 - name: Check if Flathub repository is added
@@ -78,7 +76,6 @@
   tags:
     - desktop
     - browser
-    - brave
 
 - name: Add Flathub repository
   command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -87,27 +84,6 @@
   tags:
     - desktop
     - browser
-    - brave
-
-# Check if Brave Browser is already installed
-- name: Check if Brave Browser is already installed
-  command: flatpak list --app
-  register: installed_flatpaks
-  changed_when: false
-  check_mode: no
-  tags:
-    - desktop
-    - browser
-    - brave
-
-- name: Install Brave Browser from Flathub
-  command: flatpak install -y flathub com.brave.Browser
-  become: yes
-  when: "'com.brave.Browser' not in installed_flatpaks.stdout"
-  tags:
-    - desktop
-    - browser
-    - brave
 
 # Check if Thunderbird is already installed
 - name: Check if Thunderbird is installed
