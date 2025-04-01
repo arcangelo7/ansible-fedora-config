@@ -50,6 +50,15 @@
     - applications
     - drawing
 
+# Install Zoom Flatpak
+- name: Install Zoom Flatpak
+  community.general.flatpak:
+    name: "{{ zoom_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - zoom
+
 # Install Joplin AppImage
 # Check if Joplin is already installed
 - name: Check if Joplin AppImage exists
