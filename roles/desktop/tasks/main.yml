@@ -107,3 +107,126 @@
     - desktop
     - email
     - thunderbird
+
+# Check if GNOME Remote Desktop packages are installed
+- name: Check if GNOME Remote Desktop is installed
+  command: rpm -q gnome-remote-desktop
+  register: remote_desktop_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - desktop
+    - remote-desktop
+
+# Install GNOME Remote Desktop
+- name: Install GNOME Remote Desktop
+  dnf:
+    name:
+      - gnome-remote-desktop
+    state: present
+  when: remote_desktop_check.rc != 0
+  tags:
+    - desktop
+    - remote-desktop
+
+# Install psutil Python module required for dconf
+- name: Install Python psutil module
+  become: yes
+  package:
+    name: python3-psutil
+    state: present
+  tags:
+    - desktop
+    - remote-desktop
+
+# Enable GNOME Remote Desktop service for the user
+- name: Enable GNOME Remote Desktop service for user
+  systemd:
+    name: gnome-remote-desktop.service
+    scope: user
+    state: started
+    enabled: yes
+  become: no
+  tags:
+    - desktop
+    - remote-desktop
+
+# Configure GNOME Remote Desktop RDP settings
+- name: Configure GNOME Remote Desktop RDP settings
+  dconf:
+    key: "/org/gnome/desktop/remote-desktop/rdp/{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { key: 'enable', value: 'true' }
+    - { key: 'tls-cert', value: "'{{ ansible_user_dir }}/.local/share/gnome-remote-desktop/rdp-tls.crt'" }
+    - { key: 'tls-key', value: "'{{ ansible_user_dir }}/.local/share/gnome-remote-desktop/rdp-tls.key'" }
+    - { key: 'view-only', value: 'false' }
+  become: no
+  tags:
+    - desktop
+    - remote-desktop
+
+# Generate RDP certificate if it doesn't exist
+- name: Check if RDP certificate exists
+  stat:
+    path: "{{ ansible_user_dir }}/.local/share/gnome-remote-desktop/rdp-tls.crt"
+  register: rdp_cert
+  tags:
+    - desktop
+    - remote-desktop
+
+- name: Create gnome-remote-desktop directory if it doesn't exist
+  file:
+    path: "{{ ansible_user_dir }}/.local/share/gnome-remote-desktop"
+    state: directory
+    mode: '0700'
+  when: not rdp_cert.stat.exists
+  tags:
+    - desktop
+    - remote-desktop
+
+# Ensure openssl is installed
+- name: Install openssl
+  become: yes
+  package:
+    name: openssl
+    state: present
+  when: not rdp_cert.stat.exists
+  tags:
+    - desktop
+    - remote-desktop
+
+- name: Generate RDP certificate and key
+  shell: cd {{ ansible_user_dir }}/.local/share/gnome-remote-desktop && openssl req -new -x509 -days 3650 -nodes -out rdp-tls.crt -keyout rdp-tls.key -subj "/CN={{ ansible_hostname }}"
+  when: not rdp_cert.stat.exists
+  tags:
+    - desktop
+    - remote-desktop
+
+# Set proper permissions on TLS files
+- name: Set permissions on TLS cert and key
+  file:
+    path: "{{ item }}"
+    mode: '0600'
+  loop:
+    - "{{ ansible_user_dir }}/.local/share/gnome-remote-desktop/rdp-tls.crt"
+    - "{{ ansible_user_dir }}/.local/share/gnome-remote-desktop/rdp-tls.key"
+  when: not rdp_cert.stat.exists
+  tags:
+    - desktop
+    - remote-desktop
+
+# Configure firewall for RDP
+- name: Allow RDP through the firewall
+  firewalld:
+    service: rdp
+    permanent: true
+    state: enabled
+    immediate: yes
+  become: yes
+  tags:
+    - desktop
+    - remote-desktop
+    - firewall
