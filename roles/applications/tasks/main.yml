@@ -32,15 +32,6 @@
     - applications
     - discord
 
-# Install Firefox Flatpak
-- name: Install Firefox Flatpak
-  community.general.flatpak:
-    name: "{{ firefox_flatpak_app_id }}"
-    state: present
-  tags:
-    - applications
-    - firefox
-
 # Install VLC Flatpak
 - name: Install VLC Flatpak
   community.general.flatpak:

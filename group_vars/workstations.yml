@@ -20,8 +20,6 @@ fedora_bloatware:
   - gnome-clocks
   - cheese
   - snapshot
-  - firefox-langpacks
-  - firefox
   - loupe
   - abrt-gui
   - abrt-desktop
@@ -35,7 +33,6 @@ fedora_bloatware:
 common_packages:
   - git
   - htop
-  - tilix
   - wget
   - curl
   - hw-probe
