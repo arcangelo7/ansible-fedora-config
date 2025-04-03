@@ -27,6 +27,8 @@
   changed_when: false
   failed_when: false
   check_mode: no
+  become: yes
+  become_user: "{{ local_user }}"
   tags:
     - development
     - git
@@ -37,6 +39,8 @@
   changed_when: false
   failed_when: false
   check_mode: no
+  become: yes
+  become_user: "{{ local_user }}"
   tags:
     - development
     - git
@@ -47,6 +51,8 @@
   changed_when: false
   failed_when: false
   check_mode: no
+  become: yes
+  become_user: "{{ local_user }}"
   tags:
     - development
     - git
@@ -58,6 +64,8 @@
     scope: global
     value: "{{ git_config.user.name }}"
   when: current_git_username.stdout != git_config.user.name
+  become: yes
+  become_user: "{{ local_user }}"
   tags:
     - development
     - git
@@ -68,6 +76,8 @@
     scope: global
     value: "{{ git_config.user.email }}"
   when: current_git_email.stdout != git_config.user.email
+  become: yes
+  become_user: "{{ local_user }}"
   tags:
     - development
     - git
@@ -78,6 +88,8 @@
     scope: global
     value: "{{ git_config.core.editor }}"
   when: current_git_editor.stdout != git_config.core.editor
+  become: yes
+  become_user: "{{ local_user }}"
   tags:
     - development
     - git
@@ -199,6 +211,23 @@
   changed_when: false
   failed_when: false
   check_mode: no  # Run even in check mode
+  tags:
+    - development
+    - docker
+
+# Use official Docker repository setup approach
+- name: Install dnf-plugins-core
+  command: dnf -y install dnf-plugins-core
+  args:
+    creates: /usr/bin/dnf-3
+  tags:
+    - development
+    - docker
+
+- name: Add Docker CE repository using dnf-3 config-manager
+  command: dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
   tags:
     - development
     - docker
