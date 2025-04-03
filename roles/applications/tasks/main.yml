@@ -68,6 +68,16 @@
     - applications
     - zoom
 
+# Install Remmina Flatpak for remote desktop connections
+- name: Install Remmina Flatpak
+  community.general.flatpak:
+    name: "{{ remmina_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - remmina
+    - remote-desktop
+
 # Install Joplin AppImage
 # Check if Joplin is already installed
 - name: Check if Joplin AppImage exists

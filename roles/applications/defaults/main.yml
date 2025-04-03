@@ -16,6 +16,9 @@ drawing_flatpak_app_id: "com.github.maoschanz.drawing"
 # Zoom Flatpak
 zoom_flatpak_app_id: "us.zoom.Zoom"
 
+# Remmina Flatpak
+remmina_flatpak_app_id: "org.remmina.Remmina"
+
 # Joplin AppImage
 joplin_appimage_url: "https://github.com/laurent22/joplin/releases/download/v3.2.13/Joplin-3.2.13.AppImage"
 joplin_appimage_dest: "/opt/appimages/Joplin.AppImage"
