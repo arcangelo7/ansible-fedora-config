@@ -230,3 +230,121 @@
     - desktop
     - remote-desktop
     - firewall
+
+# Install ddcui for monitor brightness control
+- name: Check if dnf-plugins-core is installed
+  command: rpm -q dnf-plugins-core
+  register: dnf_plugins_core_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+- name: Install dnf-plugins-core if not installed
+  dnf:
+    name: dnf-plugins-core
+    state: present
+  when: dnf_plugins_core_check.rc != 0
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+- name: Enable rockowitz/ddcutil COPR repository
+  command: dnf copr enable -y rockowitz/ddcutil
+  register: enable_copr_result
+  changed_when: "'enabled' in enable_copr_result.stdout"
+  failed_when: false
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+- name: Install ddcutil and ddcui
+  dnf:
+    name: 
+      - ddcutil
+      - ddcui
+    state: present
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+# Ensure required kernel modules are loaded
+- name: Create modules-load.d directory for ddcutil
+  file:
+    path: /etc/modules-load.d
+    state: directory
+    mode: '0755'
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+- name: Configure kernel modules for ddcutil
+  copy:
+    dest: /etc/modules-load.d/ddcutil.conf
+    content: |
+      # Load i2c modules needed by ddcutil
+      i2c_dev
+      i2c_core
+    mode: 0644
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+- name: Load i2c kernel modules immediately
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - i2c_dev
+    - i2c_core
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+# Configure udev rules for non-root access
+- name: Add udev rules for i2c access
+  copy:
+    dest: /etc/udev/rules.d/90-i2c-permissions.rules
+    content: |
+      # Give i2c group members permission to access the devices
+      KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
+    mode: 0644
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+- name: Create i2c group if it doesn't exist
+  group:
+    name: i2c
+    state: present
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+- name: Add user to i2c group
+  user:
+    name: "{{ local_user }}"
+    groups: i2c
+    append: yes
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+- name: Reload udev rules
+  shell: udevadm control --reload-rules && udevadm trigger
+  tags:
+    - desktop
+    - monitor
+    - ddcui
