@@ -1,0 +1,100 @@
+---
+# Install Java and Maven development tools
+
+# Install Adoptium Temurin repository
+- name: Install Adoptium Temurin Java repository
+  dnf:
+    name: "{{ adoptium_repo_package }}"
+    state: present
+  tags:
+    - development
+    - java
+
+# Install multiple Java versions
+- name: Install Java Temurin packages
+  dnf:
+    name: "{{ java_packages }}"
+    state: present
+  tags:
+    - development
+    - java
+
+# Set default Java version using alternatives
+- name: Set default Java version
+  command: >
+    alternatives --install /usr/bin/java java 
+    /usr/lib/jvm/temurin-{{ default_java_version }}-jdk/bin/java {{ default_java_version | int * 1000 + 500 }}
+  when: default_java_version is defined
+  tags:
+    - development
+    - java
+
+# Set default Javac version using alternatives (if development packages are installed)
+- name: Set default Javac version
+  command: >
+    alternatives --install /usr/bin/javac javac
+    /usr/lib/jvm/temurin-{{ default_java_version }}-jdk/bin/javac {{ default_java_version | int * 1000 + 500 }}
+  when: default_java_version is defined and development_versions is defined and default_java_version in development_versions
+  tags:
+    - development
+    - java
+
+# Set Java alternatives to use the default version
+- name: Set Java to default version
+  command: >
+    alternatives --set java /usr/lib/jvm/temurin-{{ default_java_version }}-jdk/bin/java
+  when: default_java_version is defined
+  tags:
+    - development
+    - java
+
+# Set Javac alternatives to use the default version
+- name: Set Javac to default version
+  command: >
+    alternatives --set javac /usr/lib/jvm/temurin-{{ default_java_version }}-jdk/bin/javac
+  when: default_java_version is defined and development_versions is defined and default_java_version in development_versions
+  tags:
+    - development
+    - java
+
+# Create JAVA_HOME environment variable for all users
+- name: Create Java environment variables file
+  template:
+    src: java.sh.j2
+    dest: /etc/profile.d/java.sh
+    mode: '0644'
+  tags:
+    - development
+    - java
+
+# Install Maven
+- name: Install Maven
+  dnf:
+    name: "{{ maven_packages }}"
+    state: present
+  tags:
+    - development
+    - maven
+
+# Configure Maven settings
+- name: Create Maven settings directory for user
+  file:
+    path: "/home/{{ local_user }}/.m2"
+    state: directory
+    owner: "{{ local_user }}"
+    group: "{{ local_user }}"
+    mode: '0755'
+  tags:
+    - development
+    - maven
+
+- name: Configure Maven settings.xml
+  template:
+    src: maven-settings.xml.j2
+    dest: "/home/{{ local_user }}/.m2/settings.xml"
+    owner: "{{ local_user }}"
+    group: "{{ local_user }}"
+    mode: '0644'
+  tags:
+    - development
+    - maven 

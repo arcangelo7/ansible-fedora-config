@@ -20,6 +20,14 @@
     - development
     - packages
 
+# Install Java and Maven
+- name: Install Java and Maven
+  import_tasks: java_maven.yml
+  tags:
+    - development
+    - java
+    - maven
+
 # Check current Git configurations
 - name: Check current Git username
   shell: git config --global user.name

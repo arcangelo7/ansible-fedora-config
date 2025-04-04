@@ -52,6 +52,44 @@ development_packages:
   - nano
   - gh
 
+# Java configuration
+# Using Adoptium Temurin packages (recommended by Fedora)
+java_packages:
+  # Temurin Java packages
+  - temurin-8-jre
+  - temurin-11-jre
+  - temurin-17-jre
+  - temurin-21-jre
+  # Development packages (with compiler)
+  - temurin-8-jdk
+  - temurin-11-jdk
+  - temurin-17-jdk
+  - temurin-21-jdk
+
+# Repository package for Temurin
+adoptium_repo_package: adoptium-temurin-java-repository
+
+# Default Java version (8, 11, 17, 21)
+default_java_version: "8"
+
+# List of installed Java versions (for version switching script)
+installed_java_versions:
+  - "8"
+  - "11" 
+  - "17"
+  - "21"
+
+# List of versions with development tools installed
+development_versions:
+  - "8"
+  - "11"
+  - "17"
+  - "21"
+
+# Maven configuration
+maven_packages:
+  - maven
+
 # Git configuration
 git_config:
   user:

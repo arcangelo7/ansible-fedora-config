@@ -1,0 +1,47 @@
+#!/bin/bash
+# Java environment configuration
+
+# Set JAVA_HOME 
+export JAVA_HOME=/usr/lib/jvm/temurin-{{ default_java_version }}-jdk
+
+# Add other Java-related environment variables if needed
+# export JDK_HOME=$JAVA_HOME
+
+# Java version switching functions
+{% if installed_java_versions is defined and installed_java_versions|length > 0 %}
+# Java version switching functions
+switch_java() {
+    if [ -z "$1" ]; then
+        echo "Usage: switch_java VERSION"
+        echo "Available versions:"
+{% for version in installed_java_versions %}
+        echo "  {{ version }}"
+{% endfor %}
+        return 1
+    fi
+
+    if [[ "$1" =~ ^({% for version in installed_java_versions %}{{ version }}{% if not loop.last %}|{% endif %}{% endfor %})$ ]]; then
+        sudo alternatives --set java /usr/lib/jvm/temurin-$1-jdk/bin/java
+        # Check if javac exists for the requested version
+        if [ -x "/usr/lib/jvm/temurin-$1-jdk/bin/javac" ]; then
+            sudo alternatives --set javac /usr/lib/jvm/temurin-$1-jdk/bin/javac
+        fi
+        export JAVA_HOME=/usr/lib/jvm/temurin-$1-jdk
+        echo "Java version switched to $1"
+        java -version
+    else
+        echo "Invalid Java version: $1"
+        echo "Available versions:"
+{% for version in installed_java_versions %}
+        echo "  {{ version }}"
+{% endfor %}
+        return 1
+    fi
+}
+
+# Java version checking function
+java_version() {
+    java -version
+    echo "JAVA_HOME=$JAVA_HOME"
+}
+{% endif %} 
