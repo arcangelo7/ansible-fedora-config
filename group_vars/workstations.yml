@@ -37,6 +37,7 @@ common_packages:
   - curl
   - hw-probe
   - knock
+  - tmux
 
 # Development packages to install
 development_packages:
