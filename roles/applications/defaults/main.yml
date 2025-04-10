@@ -19,6 +19,9 @@ zoom_flatpak_app_id: "us.zoom.Zoom"
 # Remmina Flatpak
 remmina_flatpak_app_id: "org.remmina.Remmina"
 
+# Stremio Flatpak
+stremio_flatpak_app_id: "com.stremio.Stremio"
+
 # Joplin AppImage
 joplin_appimage_url: "https://github.com/laurent22/joplin/releases/download/v3.2.13/Joplin-3.2.13.AppImage"
 joplin_appimage_dest: "/opt/appimages/Joplin.AppImage"
@@ -30,9 +33,9 @@ bin_dir: "/usr/local/bin"
 
 # Joplin CLI - Sincronizzazione
 joplin_sync_target: 5  # 5 per WebDAV
-joplin_sync_webdav_path: "https://cloud-arcangelo.duckdns.org/remote.php/dav/files/arcangelo/Documents/Joplin/"
+joplin_sync_webdav_path: "https://cloud.arcangelomassari.com/remote.php/dav/files/arcangelo/Documents/Joplin/"
 joplin_sync_webdav_username: "arcangelo"
-joplin_sync_webdav_password: "{{ vault_joplin_webdav_password | default('') }}"  # Da definire in vault
+joplin_sync_webdav_password: "{{ vault_joplin_webdav_password | default('') }}"  # Da definire in .env
 
 # Jimmy CLI
 jimmy_download_url: "https://github.com/marph91/jimmy/releases/latest/download/jimmy-cli-linux"

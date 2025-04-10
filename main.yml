@@ -2,6 +2,8 @@
 - name: Configure Fedora Workstation
   hosts: workstations
   become: true
+  vars_files:
+    - group_vars/vault/joplin.yml
   
   roles:
     - common

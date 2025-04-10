@@ -69,6 +69,15 @@
     - remmina
     - remote-desktop
 
+# Install Stremio Flatpak
+- name: Install Stremio Flatpak
+  community.general.flatpak:
+    name: "{{ stremio_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - stremio
+
 # Install Joplin AppImage
 # Check if Joplin is already installed
 - name: Check if Joplin AppImage exists

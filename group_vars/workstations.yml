@@ -38,6 +38,7 @@ common_packages:
   - hw-probe
   - knock
   - tmux
+  - wireguard-tools
 
 # Development packages to install
 development_packages:
