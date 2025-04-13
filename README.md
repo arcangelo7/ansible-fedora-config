@@ -36,6 +36,9 @@ This repository contains Ansible playbooks and roles to automatically configure 
    
    # Cursor (code editor) installation
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "cursor"
+   
+   # Android Studio installation
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "android-studio"
    ```
 
 ## Idempotency
@@ -95,6 +98,7 @@ Installs and configures additional applications:
 - VLC via Flatpak (`tags: applications, vlc`)
 - Drawing via Flatpak (`tags: applications, drawing`)
 - Zoom via Flatpak (`tags: applications, zoom`)
+- Android Studio via Flatpak (`tags: applications, development, android-studio`)
 - Cursor (AI-first code editor) as AppImage (`tags: applications, cursor`)
   - Downloads the AppImage to `/opt/appimages/`
   - Extracts the icon from the AppImage

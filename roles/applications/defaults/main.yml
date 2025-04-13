@@ -47,3 +47,6 @@ btrfs_assistant_package_name: "btrfs-assistant"
 # Google Chrome
 google_chrome_repo_url: "https://dl.google.com/linux/chrome/rpm/stable/x86_64"
 google_chrome_package_name: "google-chrome-stable"
+
+# Android Studio Flatpak
+android_studio_flatpak_app_id: "com.google.AndroidStudio"
