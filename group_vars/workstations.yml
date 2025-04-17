@@ -28,6 +28,7 @@ fedora_bloatware:
   - gnome-calendar
   - gnome-text-editor
   - mediawriter
+  - malcontent-control
 
 # Common packages to install
 common_packages:
