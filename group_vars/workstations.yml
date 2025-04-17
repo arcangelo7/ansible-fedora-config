@@ -29,6 +29,9 @@ fedora_bloatware:
   - gnome-text-editor
   - mediawriter
   - malcontent-control
+  - hplip-gui
+  - gnome-characters
+  - gnome-font-viewer
 
 # Common packages to install
 common_packages:
