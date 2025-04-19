@@ -43,6 +43,7 @@ common_packages:
   - knock
   - tmux
   - wireguard-tools
+  - ncurses-compat-libs
 
 # Development packages to install
 development_packages:
