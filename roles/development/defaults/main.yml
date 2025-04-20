@@ -16,4 +16,13 @@ windsurf_binary_path: "{{ windsurf_install_dir }}/Windsurf/windsurf"
 windsurf_icon_dest: "/usr/share/icons/hicolor/256x256/apps/windsurf.png"
 windsurf_desktop_entry_dest: "/usr/share/applications/windsurf.desktop"
 windsurf_metadata_file: "{{ windsurf_install_dir }}/windsurf.version"
-windsurf_tarball_dest: "/tmp/windsurf.tar.gz" 
+windsurf_tarball_dest: "/tmp/windsurf.tar.gz"
+
+# uv Python package manager/installer
+uv_version: "0.6.14" # Updated to latest version
+uv_platform: "x86_64-unknown-linux-musl" # Use musl for static linking, better portability
+uv_download_url: "https://github.com/astral-sh/uv/releases/download/{{ uv_version }}/uv-{{ uv_platform }}.tar.gz"
+uv_checksum: "sha256:0cac4df0cb3457b154f2039ae471e89cd4e15f3bd790bbb3cb0b8b40d940b93e"
+uv_install_path: "/usr/local/bin/uv"
+uv_tmp_archive: "/tmp/uv-{{ uv_version }}.tar.gz"
+uv_tmp_extract_dir: "/tmp/uv-{{ uv_version }}-extract"

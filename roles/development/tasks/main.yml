@@ -351,6 +351,107 @@
     - development
     - python
 
+# Install uv (fast Python package manager)
+- name: Check if uv is already installed at {{ uv_install_path }}
+  stat:
+    path: "{{ uv_install_path }}"
+  register: uv_binary_check
+  tags:
+    - development
+    - python
+    - uv
+
+- name: Check uv version if installed
+  command: "{{ uv_install_path }} --version"
+  register: uv_current_version_output
+  when: uv_binary_check.stat.exists
+  changed_when: false
+  failed_when: false # Don't fail if the command fails
+  check_mode: no
+  tags:
+    - development
+    - python
+    - uv
+
+- name: Extract installed uv version
+  set_fact:
+    uv_installed_version: "{{ uv_current_version_output.stdout | regex_search('uv (\\d+\\.\\d+\\.\\d+)', '\\1') | first }}"
+  when: 
+    - uv_binary_check.stat.exists
+    - uv_current_version_output.rc == 0
+  tags:
+    - development
+    - python
+    - uv
+
+- name: Determine if uv needs installation or update
+  set_fact:
+    uv_needs_install: "{{ not uv_binary_check.stat.exists or uv_installed_version is not defined or uv_installed_version != uv_version }}"
+  tags:
+    - development
+    - python
+    - uv
+
+- name: Download uv {{ uv_version }} tarball
+  get_url:
+    url: "{{ uv_download_url }}"
+    dest: "{{ uv_tmp_archive }}"
+    checksum: "{{ uv_checksum }}"
+    mode: '0644'
+  when: uv_needs_install
+  tags:
+    - development
+    - python
+    - uv
+
+- name: Create temporary directory for uv extraction
+  file:
+    path: "{{ uv_tmp_extract_dir }}"
+    state: directory
+    mode: '0755'
+  when: uv_needs_install
+  tags:
+    - development
+    - python
+    - uv
+
+- name: Extract uv tarball
+  unarchive:
+    src: "{{ uv_tmp_archive }}"
+    dest: "{{ uv_tmp_extract_dir }}"
+    remote_src: yes
+  when: uv_needs_install
+  tags:
+    - development
+    - python
+    - uv
+
+- name: Move uv binary to {{ uv_install_path }}
+  copy:
+    src: "{{ uv_tmp_extract_dir }}/uv-{{ uv_platform }}/uv"
+    dest: "{{ uv_install_path }}"
+    mode: '0755'
+    remote_src: yes
+  become: true
+  when: uv_needs_install
+  tags:
+    - development
+    - python
+    - uv
+
+- name: Clean up uv temporary files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ uv_tmp_archive }}"
+    - "{{ uv_tmp_extract_dir }}"
+  when: uv_needs_install
+  tags:
+    - development
+    - python
+    - uv
+
 # Check if Cursor is already installed
 - name: Check if Cursor AppImage exists
   stat:
