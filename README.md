@@ -2,12 +2,30 @@
 
 This repository contains Ansible playbooks and roles to automatically configure a Fedora system with my personal settings.
 
+## Table of Contents
+
+- [Fedora System Configuration with Ansible](#fedora-system-configuration-with-ansible)
+  - [Prerequisites](#prerequisites)
+  - [Ansible Usage](#ansible-usage)
+  - [BTRFS Subvolume Setup](#btrfs-subvolume-setup)
+  - [Idempotency](#idempotency)
+  - [Repository Structure](#repository-structure)
+  - [Available Roles](#available-roles)
+    - [Common](#common)
+    - [Development](#development)
+    - [Desktop](#desktop)
+    - [Applications](#applications)
+  - [Customization](#customization)
+
 ## Prerequisites
 
 - Fedora (tested on Fedora 41)
 - Ansible installed (`sudo dnf install ansible`)
+- For the BTRFS script: A BTRFS filesystem setup on the root partition.
 
-## Usage
+## Ansible Usage
+
+> **Note:** Before running the playbook, ensure the `local_user` variable in `group_vars/workstations.yml` is set to your actual username.
 
 1. Clone this repository:
    ```bash
@@ -40,6 +58,44 @@ This repository contains Ansible playbooks and roles to automatically configure 
    # Android Studio installation
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "android-studio"
    ```
+
+## BTRFS Subvolume Setup
+
+This repository also includes a shell script `btrfs-subvolumes-setup.sh` to automatically configure a recommended BTRFS subvolume layout for `/var`. This helps in organizing snapshots and managing system directories more effectively.
+
+> **Note:** Before running the script, open `btrfs-subvolumes-setup.sh` and change the `USER_NAME` variable at the top to match your actual username.
+
+**Why is this useful?**
+
+Creating separate subvolumes for volatile directories under `/var` is particularly important when using snapshot tools like Snapper. Snapper allows you to take snapshots of your `root` (and potentially `home`) subvolume and restore them later.
+
+However, directories like `/var/log`, `/var/cache`, `/var/tmp`, and `/var/lib/gdm` contain data that changes frequently and should generally *not* be rolled back with the rest of the system. If these directories are part of the main `root` snapshot and you restore an older snapshot, you might bring back outdated cache files, logs, or service states.
+
+This can lead to system inconsistencies, prevent services from starting correctly, or even make the system unbootable from GRUB. By placing these volatile directories on their own subvolumes using this script, you ensure they are excluded from `root` snapshots, maintaining system stability during rollbacks.
+
+**Usage:**
+
+1.  Navigate to the repository directory:
+    ```bash
+    cd fedora-ansible-config
+    ```
+2.  Make the script executable:
+    ```bash
+    chmod +x btrfs-subvolumes-setup.sh
+    ```
+3.  Run the script with `sudo`:
+    ```bash
+    sudo ./btrfs-subvolumes-setup.sh
+    ```
+
+**What it does:**
+
+- Creates separate BTRFS subvolumes for directories like `var/cache`, `var/log`, `var/tmp`, etc.
+- Backs up existing data before creating subvolumes.
+- Updates `/etc/fstab` to mount the new subvolumes correctly.
+- Restores SELinux contexts and user permissions.
+
+**Important:** This script modifies your `/etc/fstab` and filesystem structure. It's recommended to back up important data before running it, although the script includes its own backup steps.
 
 ## Idempotency
 
@@ -109,6 +165,7 @@ Installs and configures additional applications:
 
 You can customize the configuration by modifying the `group_vars/workstations.yml` file, which includes:
 
+- `local_user`: **(Important!)** Set this to your local username. Used by several roles.
 - `fedora_bloatware`: List of DNF packages to remove
 - `flatpak_bloatware`: List of Flatpak applications to remove
 - `common_packages`: List of base packages to install
