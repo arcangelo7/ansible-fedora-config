@@ -3,6 +3,7 @@
 *.pyc
 __pycache__/
 .ansible/
+.cursor
 
 # Editor files
 .vscode/

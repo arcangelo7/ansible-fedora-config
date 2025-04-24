@@ -438,7 +438,6 @@
     - applications
     - joplin-cli
     - joplin-sync
-  no_log: true
 
 - name: Update Joplin CLI configuration state file
   copy:
@@ -553,3 +552,12 @@
   tags:
     - applications
     - chrome
+
+# Install Spotify Flatpak
+- name: Install Spotify Flatpak
+  community.general.flatpak:
+    name: "{{ spotify_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - spotify

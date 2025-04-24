@@ -298,19 +298,21 @@
     - monitor
     - ddcui
 
+# Load i2c kernel modules
 - name: Load i2c kernel modules immediately
   modprobe:
     name: "{{ item }}"
     state: present
-  loop:
+  loop: 
     - i2c_dev
     - i2c_core
+  ignore_errors: yes  # Ignore errors if modules are already loaded
   tags:
     - desktop
     - monitor
     - ddcui
 
-# Configure udev rules for non-root access
+# Add udev rules for i2c access
 - name: Add udev rules for i2c access
   copy:
     dest: /etc/udev/rules.d/90-i2c-permissions.rules
@@ -318,32 +320,38 @@
       # Give i2c group members permission to access the devices
       KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
     mode: 0644
+  register: udev_rules_result
   tags:
     - desktop
     - monitor
     - ddcui
 
+# Create i2c group
 - name: Create i2c group if it doesn't exist
   group:
     name: i2c
     state: present
+    system: yes
   tags:
     - desktop
     - monitor
     - ddcui
 
+# Add user to i2c group
 - name: Add user to i2c group
   user:
     name: "{{ local_user }}"
     groups: i2c
     append: yes
+  register: user_group_result
   tags:
     - desktop
     - monitor
     - ddcui
 
 - name: Reload udev rules
-  shell: udevadm control --reload-rules && udevadm trigger
+  command: udevadm control --reload-rules && udevadm trigger
+  when: udev_rules_result.changed or user_group_result.changed
   tags:
     - desktop
     - monitor

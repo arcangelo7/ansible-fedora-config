@@ -19,12 +19,21 @@
     - development
     - java
 
+# Check if Java alternatives link exists
+- name: Check if Java alternative is already configured
+  stat:
+    path: /etc/alternatives/java
+  register: java_alternative_check
+  tags:
+    - development
+    - java
+
 # Set default Java version using alternatives
 - name: Set default Java version
   command: >
     alternatives --install /usr/bin/java java 
     /usr/lib/jvm/temurin-{{ default_java_version }}-jdk/bin/java {{ default_java_version | int * 1000 + 500 }}
-  when: default_java_version is defined
+  when: default_java_version is defined and not java_alternative_check.stat.exists
   tags:
     - development
     - java
@@ -34,7 +43,11 @@
   command: >
     alternatives --install /usr/bin/javac javac
     /usr/lib/jvm/temurin-{{ default_java_version }}-jdk/bin/javac {{ default_java_version | int * 1000 + 500 }}
-  when: default_java_version is defined and development_versions is defined and default_java_version in development_versions
+  when: 
+    - default_java_version is defined 
+    - development_versions is defined 
+    - default_java_version in development_versions
+    - not java_alternative_check.stat.exists
   tags:
     - development
     - java
@@ -43,7 +56,7 @@
 - name: Set Java to default version
   command: >
     alternatives --set java /usr/lib/jvm/temurin-{{ default_java_version }}-jdk/bin/java
-  when: default_java_version is defined
+  when: default_java_version is defined and not java_alternative_check.stat.exists
   tags:
     - development
     - java
@@ -52,7 +65,11 @@
 - name: Set Javac to default version
   command: >
     alternatives --set javac /usr/lib/jvm/temurin-{{ default_java_version }}-jdk/bin/javac
-  when: default_java_version is defined and development_versions is defined and default_java_version in development_versions
+  when: 
+    - default_java_version is defined 
+    - development_versions is defined 
+    - default_java_version in development_versions
+    - not java_alternative_check.stat.exists
   tags:
     - development
     - java

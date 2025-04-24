@@ -16,6 +16,7 @@ This repository contains Ansible playbooks and roles to automatically configure 
     - [Desktop](#desktop)
     - [Applications](#applications)
   - [Customization](#customization)
+    - [Managing Joplin Synchronization Credentials](#managing-joplin-synchronization-credentials)
 
 ## Prerequisites
 
@@ -34,29 +35,35 @@ This repository contains Ansible playbooks and roles to automatically configure 
    ```
 
 2. Run the main playbook:
+   This playbook uses Ansible Vault to protect sensitive information (like the Joplin WebDAV password). You will be prompted for the vault password when running the full playbook, as it includes tasks requiring vaulted variables.
    ```bash
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass
    ```
 
-   Or run only specific tags:
+   > **Important:** Before running for the first time, ensure you have configured your Joplin WebDAV credentials as described in the [Managing Joplin Synchronization Credentials](#managing-joplin-synchronization-credentials) section under "Customization".
+
+   Or run only specific tags. You only need to add `--ask-vault-pass` if the selected tags include tasks that rely on vaulted variables (e.g., `--tags "applications"` or `--tags "joplin-sync"`):
    ```bash
-   # System update and base packages
+   # System update and base packages (no vault needed)
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "system,base-packages"
    
-   # Development environment configuration
+   # Development environment configuration (no vault needed)
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "development"
    
-   # Docker installation
+   # Docker installation (no vault needed)
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "docker"
    
-   # Desktop and browser configuration
+   # Desktop and browser configuration (no vault needed)
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "desktop,browser"
    
-   # Cursor (code editor) installation
+   # Cursor (code editor) installation (no vault needed)
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "cursor"
    
-   # Android Studio installation
+   # Android Studio installation (no vault needed)
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "android-studio"
+
+   # Example: Running applications tag which includes Joplin sync (vault needed)
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "applications"
    ```
 
 ## BTRFS Subvolume Setup
@@ -173,3 +180,36 @@ You can customize the configuration by modifying the `group_vars/workstations.ym
 - `git_config`: Git configuration (username, email, editor)
 
 Additionally, you can modify the specific settings for each role in their respective `defaults/main.yml` files. 
+
+### Managing Joplin Synchronization Credentials
+
+This configuration requires you to provide your personal WebDAV server details for Joplin synchronization.
+
+Default values are placeholders in `roles/applications/defaults/main.yml`, but you **must override** them with your own settings:
+
+1.  **Configure Non-Sensitive Details:** Create a new file (e.g., `group_vars/all/joplin_settings.yml`) or add to an existing *non-vault* group variables file. Define your WebDAV path and username here:
+    ```yaml
+    # group_vars/all/joplin_settings.yml
+    joplin_sync_webdav_path: "YOUR_WEBDAV_URL_HERE"
+    joplin_sync_webdav_username: "YOUR_WEBDAV_USERNAME_HERE"
+    ```
+
+2.  **Configure Password Securely (using Vault):** 
+    *   If you haven't already, create an encrypted vault file (e.g., `group_vars/all/vault.yml`):
+        ```bash
+        ansible-vault create group_vars/all/vault.yml
+        ```
+        Set a strong vault password when prompted.
+    *   Inside the vault file (which opens in your editor), define the password variable using **your actual WebDAV password**:
+        ```yaml
+        # group_vars/all/vault.yml
+        vault_joplin_webdav_password: "YOUR_ACTUAL_WEBDAV_PASSWORD"
+        ```
+    *   Save and close the editor.
+
+3.  **Run Playbook with Vault Password:** Remember to always use the `--ask-vault-pass` flag when running `ansible-playbook` so it can decrypt the password:
+    ```bash
+    ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass
+    ```
+
+This ensures your sensitive password remains encrypted while allowing you to customize the synchronization target for your own environment. 
