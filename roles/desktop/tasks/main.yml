@@ -356,3 +356,42 @@
     - desktop
     - monitor
     - ddcui
+
+# --- Desktop Background Configuration ---
+
+# Ensure the target directory for backgrounds exists
+- name: Create user backgrounds directory
+  file:
+    path: "/home/{{ local_user }}/.local/share/backgrounds"
+    state: directory
+    mode: '0755'
+  become: no
+  tags:
+    - desktop
+    - background
+
+# Copy the background image to the target directory
+- name: Copy background image
+  copy:
+    src: roles/desktop/images/wallhaven-q621dq.png
+    dest: "/home/{{ local_user }}/.local/share/backgrounds/@wallhaven-732y3e.png"
+    mode: '0644'
+  become: no
+  tags:
+    - desktop
+    - background
+
+# Set the GNOME desktop background
+- name: Set GNOME desktop background
+  dconf:
+    key: "/org/gnome/desktop/background/{{ item }}"
+    value: "'file:///home/{{ local_user }}/.local/share/backgrounds/@wallhaven-732y3e.png'"
+    state: present
+  loop:
+    - picture-uri
+    - picture-uri-dark  # Set for dark mode as well
+  become: no # dconf settings are per-user
+  tags:
+    - desktop
+    - background
+    - gnome-settings

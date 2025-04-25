@@ -1,5 +1,7 @@
 # Fedora System Configuration with Ansible
 
+![Configured Desktop Preview](preview.png)
+
 This repository contains Ansible playbooks and roles to automatically configure a Fedora system with my personal settings.
 
 ## Table of Contents
@@ -169,11 +171,17 @@ Installs and configures additional applications:
   - Makes the AppImage accessible from anywhere in the system
 - Conky system monitor (`tags: applications, conky, conky-config`)
   - Installs Conky and `lm-sensors` (for temperature readings).
-  - Deploys a base configuration from `roles/applications/templates/conky.conf.j2` to `~/.config/conky/conky.conf`.
+  - Deploys the *Hybrid* theme configuration files (`hybrid/hybrid.conf`, `hybrid/lua/hybrid-rings.lua`, fonts, images) to `~/.config/conky/`.
   - **Important:** After installation, you likely need to run `sudo sensors-detect` once manually and follow its prompts (answering 'yes' is usually safe for standard detection) to ensure all hardware sensors (CPU temp, fans, etc.) are detected correctly. A reboot might be needed afterward.
-  - **Customization:** Edit the template `roles/applications/templates/conky.conf.j2` to change what Conky displays. 
-    - Pay special attention to the `${hwmon ...}` lines for CPU temperature and **Fan/Pump speeds**. 
-    - You **must** check the output of the `sensors` command on *your* system to find the correct sensor chip name (e.g., `coretemp`, `nct6798`) and the correct index for each reading (e.g., `temp 1`, `fan1`, `fan5`, `fan6`). Update these values in the template file accordingly.
+  - **Customization:** The provided Conky theme (`hybrid`) is highly personalized and **will likely require manual adjustments** to work correctly on your specific hardware. To make persistent changes, edit the source files within the `hybrid/` directory in this repository:
+    - `hybrid/hybrid.conf`: Modify general layout, fonts, colors, and displayed text information (like network interface names).
+    - `hybrid/lua/hybrid-rings.lua`: Adjust the ring appearance, positioning, and the logic for reading sensor data (especially CPU core count detection and `${platform ...}` arguments which depend on your specific hardware sensors found via the `sensors` command).
+  - Changes made directly to `~/.config/conky/conky.conf` or `~/.config/conky/hybrid/lua/hybrid-rings.lua` will work for testing but will be overwritten if you re-run the Ansible playbook with the `conky` tag.
+  - **Autostart:** Conky is configured to start automatically on login using a systemd user service (`~/.config/systemd/user/conky.service`).
+  - **Disabling Autostart:** If you don't want Conky to start automatically, you can disable the systemd user service by running:
+    ```bash
+    systemctl --user disable --now conky.service
+    ```
 
 ## Customization
 
