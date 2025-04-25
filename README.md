@@ -167,6 +167,13 @@ Installs and configures additional applications:
   - Extracts the icon from the AppImage
   - Creates an application menu entry
   - Makes the AppImage accessible from anywhere in the system
+- Conky system monitor (`tags: applications, conky, conky-config`)
+  - Installs Conky and `lm-sensors` (for temperature readings).
+  - Deploys a base configuration from `roles/applications/templates/conky.conf.j2` to `~/.config/conky/conky.conf`.
+  - **Important:** After installation, you likely need to run `sudo sensors-detect` once manually and follow its prompts (answering 'yes' is usually safe for standard detection) to ensure all hardware sensors (CPU temp, fans, etc.) are detected correctly. A reboot might be needed afterward.
+  - **Customization:** Edit the template `roles/applications/templates/conky.conf.j2` to change what Conky displays. 
+    - Pay special attention to the `${hwmon ...}` lines for CPU temperature and **Fan/Pump speeds**. 
+    - You **must** check the output of the `sensors` command on *your* system to find the correct sensor chip name (e.g., `coretemp`, `nct6798`) and the correct index for each reading (e.g., `temp 1`, `fan1`, `fan5`, `fan6`). Update these values in the template file accordingly.
 
 ## Customization
 

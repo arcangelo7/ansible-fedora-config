@@ -561,3 +561,290 @@
   tags:
     - applications
     - spotify
+
+# Install Conky from Source with Lua/Cairo support
+- name: Install Conky build dependencies
+  become: true
+  ansible.builtin.dnf:
+    name:
+      # Base build tools
+      - cmake
+      - gcc
+      - gcc-c++
+      - gperf
+      - patch # Needed for build process
+      # Core Conky libs (X11, ncurses, xml)
+      - libX11-devel
+      - libXext-devel
+      - libXdamage-devel
+      - libXfixes-devel
+      - libXft-devel
+      - libXinerama-devel
+      - ncurses-devel
+      - libxml2-devel
+      # Feature libs (Lua, Cairo, Imlib2, Curl)
+      - lua-devel
+      - cairo-devel # Needed for Lua Cairo bindings
+      - imlib2-devel
+      - libcurl-devel
+      # Wayland support
+      - wayland-devel
+      - wayland-protocols-devel
+      # SVG rendering via Lua
+      - librsvg2-devel
+      # Optional but potentially useful
+      - git
+    state: present
+  tags:
+    - applications
+    - conky
+    - conky-build
+
+- name: Create Conky build directory
+  ansible.builtin.file:
+    path: "{{ conky_build_dir }}"
+    state: directory
+    mode: '0755'
+  tags:
+    - applications
+    - conky
+    - conky-build
+
+- name: Download Conky source tarball
+  ansible.builtin.get_url:
+    url: "{{ conky_source_url }}"
+    dest: "{{ conky_build_dir }}/conky-{{ conky_version }}.tar.gz"
+  tags:
+    - applications
+    - conky
+    - conky-build
+
+- name: Unarchive Conky source tarball
+  ansible.builtin.unarchive:
+    src: "{{ conky_build_dir }}/conky-{{ conky_version }}.tar.gz"
+    dest: "{{ conky_build_dir }}"
+    remote_src: yes
+    creates: "{{ conky_src_dir }}/CMakeLists.txt" # Avoid re-extracting
+  tags:
+    - applications
+    - conky
+    - conky-build
+
+- name: Create CMake build directory inside source
+  ansible.builtin.file:
+    path: "{{ conky_src_dir }}/build"
+    state: directory
+    mode: '0755'
+  tags:
+    - applications
+    - conky
+    - conky-build
+
+- name: Configure Conky build with CMake
+  ansible.builtin.command: >
+    cmake ..
+    -D CMAKE_INSTALL_PREFIX=/usr/local
+    -D CMAKE_BUILD_TYPE=Release
+    -D BUILD_LUA_CAIRO=ON
+    -D BUILD_LUA_IMLIB2=ON
+    -D BUILD_LUA_RSVG=ON
+    -D BUILD_NVIDIA=OFF
+    -D BUILD_WAYLAND=ON
+    -D BUILD_AUDACIOUS=OFF
+    -D BUILD_MPD=OFF
+  args:
+    chdir: "{{ conky_src_dir }}/build"
+    creates: "{{ conky_src_dir }}/build/Makefile" # Avoid re-configuring
+  tags:
+    - applications
+    - conky
+    - conky-build
+
+- name: Compile Conky
+  ansible.builtin.command: make -j{{ ansible_processor_vcpus | default(1) }}
+  args:
+    chdir: "{{ conky_src_dir }}/build"
+    creates: "{{ conky_src_dir }}/build/src/conky" # Avoid re-compiling
+  tags:
+    - applications
+    - conky
+    - conky-build
+
+- name: Install Conky
+  become: true
+  ansible.builtin.command: make install
+  args:
+    chdir: "{{ conky_src_dir }}/build"
+    creates: /usr/local/sbin/conky # Avoid re-installing if binary exists
+  tags:
+    - applications
+    - conky
+    - conky-build
+
+# Install lm-sensors (for Conky CPU temp)
+- name: Install lm-sensors package
+  become: true
+  ansible.builtin.dnf:
+    name: lm_sensors
+    state: present
+  tags:
+    - applications
+    - conky
+    - sensors
+
+# Configure Conky
+- name: Ensure Conky config base directory exists
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ local_user }}/.config/conky"
+    state: directory
+    mode: '0755'
+  tags:
+    - applications
+    - conky
+    - conky-config
+
+- name: Ensure Conky images directory exists
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ local_user }}/.config/conky/images"
+    state: directory
+    mode: '0755'
+  tags:
+    - applications
+    - conky
+    - conky-config
+
+- name: Deploy Conky configuration file (hybrid)
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.copy:
+    src: hybrid/hybrid.conf
+    dest: "/home/{{ local_user }}/.config/conky/conky.conf"
+    mode: '0644'
+  tags:
+    - applications
+    - conky
+    - conky-config
+
+- name: Ensure Conky Lua script directory exists
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ local_user }}/.config/conky/hybrid/lua"
+    state: directory
+    mode: '0755'
+  tags:
+    - applications
+    - conky
+    - conky-config
+
+- name: Deploy Conky Lua script (hybrid)
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.copy:
+    src: hybrid/lua/hybrid-rings.lua
+    dest: "/home/{{ local_user }}/.config/conky/hybrid/lua/hybrid-rings.lua"
+    mode: '0644'
+  tags:
+    - applications
+    - conky
+    - conky-config
+
+- name: Deploy Conky images (hybrid)
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.copy:
+    src: hybrid/images/
+    dest: "/home/{{ local_user }}/.config/conky/images/"
+    mode: '0644'
+  tags:
+    - applications
+    - conky
+    - conky-config
+
+- name: Ensure user fonts directory exists
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ local_user }}/.local/share/fonts"
+    state: directory
+    mode: '0755'
+  tags:
+    - applications
+    - conky
+    - conky-config
+    - fonts
+
+- name: Deploy Conky fonts (hybrid)
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.copy:
+    src: hybrid/fonts/
+    dest: "/home/{{ local_user }}/.local/share/fonts/"
+    mode: '0644'
+  register: font_copy_result
+  tags:
+    - applications
+    - conky
+    - conky-config
+    - fonts
+
+- name: Update font cache
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.command:
+    cmd: fc-cache -fv
+  when: font_copy_result.changed
+  changed_when: false # fc-cache always returns 0, so don't mark as changed
+  tags:
+    - applications
+    - conky
+    - conky-config
+    - fonts
+
+# Autostart Conky via systemd user service
+- name: Ensure systemd user directory exists
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ local_user }}/.config/systemd/user"
+    state: directory
+    mode: '0755'
+  tags:
+    - applications
+    - conky
+    - conky-config
+    - conky-autostart
+
+- name: Deploy Conky systemd user service file
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.template:
+    src: conky.service.j2
+    dest: "/home/{{ local_user }}/.config/systemd/user/conky.service"
+    mode: '0644'
+  register: conky_service_file
+  tags:
+    - applications
+    - conky
+    - conky-config
+    - conky-autostart
+
+- name: Enable and start Conky systemd user service
+  become: false
+  become_user: "{{ local_user }}"
+  ansible.builtin.systemd:
+    name: conky
+    scope: user
+    enabled: yes
+    state: started # Start it immediately if not running
+    daemon_reload: yes # Reload daemon if service file changed
+  when: conky_service_file.changed # Only run if the service file was created/updated
+  tags:
+    - applications
+    - conky
+    - conky-config
+    - conky-autostart
