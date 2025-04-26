@@ -45,6 +45,90 @@
     - desktop
     - gnome-extensions
 
+# Install gTile GNOME extension manually from GitHub release
+- name: Set gTile version and download URL
+  set_fact:
+    gtile_version: "V64"
+    gtile_download_url: "https://github.com/gTile/gTile/releases/download/V64/gtile.dist.tgz"
+    gtile_archive_path: "/tmp/gtile-V64.dist.tgz"
+  tags:
+    - desktop
+    - gnome-extensions
+    - gtile
+    - always # Ensure facts are always set
+
+- name: Check if gTile is already installed
+  command: gnome-extensions list
+  register: gtile_installed_check
+  changed_when: false
+  failed_when: false # Don't fail if command fails (e.g., gnome-extensions not found yet)
+  check_mode: no
+  become: no
+  tags:
+    - desktop
+    - gnome-extensions
+    - gtile
+
+- name: Download gTile release archive
+  get_url:
+    url: "{{ gtile_download_url }}"
+    dest: "{{ gtile_archive_path }}"
+    mode: '0644'
+  become: no
+  when: "'gTile@vibou' not in gtile_installed_check.stdout"
+  tags:
+    - desktop
+    - gnome-extensions
+    - gtile
+
+- name: Install gTile from archive
+  command: "gnome-extensions install -f {{ gtile_archive_path }}"
+  register: gtile_install_result
+  changed_when: "'Extension \"gTile@vibou\" installed' in gtile_install_result.stdout"
+  become: no
+  when: "'gTile@vibou' not in gtile_installed_check.stdout"
+  tags:
+    - desktop
+    - gnome-extensions
+    - gtile
+
+- name: Check if gTile is enabled
+  command: gnome-extensions list --enabled
+  register: gtile_enabled_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  become: no
+  tags:
+    - desktop
+    - gnome-extensions
+    - gtile
+
+- name: Clean up gTile archive
+  file:
+    path: "{{ gtile_archive_path }}"
+    state: absent
+  become: no
+  when: gtile_install_result.changed or "'gTile@vibou' not in gtile_installed_check.stdout" # Clean up if we attempted download/install
+  tags:
+    - desktop
+    - gnome-extensions
+    - gtile
+    - cleanup
+
+- name: Inform user about manual gTile enablement and restart
+  debug:
+    msg:
+      - "gTile GNOME Shell extension has been installed."
+      - "To enable it, you first need to restart GNOME Shell (logout/login or restart the system)."
+      - "After restarting, you can enable gTile manually (e.g., via the Extensions app or by running: gnome-extensions enable gTile@vibou)"
+  when: gtile_install_result.changed
+  tags:
+    - desktop
+    - gnome-extensions
+    - gtile
+    - always # Show message if installation happened
+
 # Verify if Flatpak is installed
 - name: Check if Flatpak is installed
   command: which flatpak

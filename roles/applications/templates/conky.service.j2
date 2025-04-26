@@ -6,8 +6,8 @@ PartOf=graphical-session.target
 [Service]
 Type=simple
 ExecStartPre=/bin/sleep 5
-# Use the specific config file deployed earlier
-ExecStart=/usr/local/bin/conky -c /home/{{ local_user }}/.config/conky/conky.conf
+# Attempt to load user environment before starting Conky
+ExecStart=/bin/sh -c 'eval $(systemctl --user show-environment); /usr/local/bin/conky -c /home/{{ local_user }}/.config/conky/conky.conf'
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=5
