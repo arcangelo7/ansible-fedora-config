@@ -44,6 +44,7 @@ common_packages:
   - tmux
   - wireguard-tools
   - ncurses-compat-libs
+  - parallel
 
 # Development packages to install
 development_packages:
