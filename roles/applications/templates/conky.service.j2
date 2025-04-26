@@ -5,6 +5,7 @@ PartOf=graphical-session.target
 
 [Service]
 Type=simple
+ExecStartPre=/bin/sleep 5
 # Use the specific config file deployed earlier
 ExecStart=/usr/local/bin/conky -c /home/{{ local_user }}/.config/conky/conky.conf
 Restart=on-failure
