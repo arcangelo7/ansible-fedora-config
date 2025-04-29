@@ -78,6 +78,15 @@
     - applications
     - stremio
 
+# Install Telegram Flatpak
+- name: Install Telegram Flatpak
+  community.general.flatpak:
+    name: "{{ telegram_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - telegram
+
 # Install Android Studio Flatpak
 - name: Install Android Studio Flatpak
   community.general.flatpak:
