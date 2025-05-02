@@ -10,7 +10,7 @@ cursor_metadata_file: "/opt/appimages/cursor.version"
 appimages_dir: "/opt/appimages" 
 
 # Windsurf AI
-windsurf_tarball_url: "https://windsurf-stable.codeiumdata.com/linux-x64/stable/b21eedafd0e27ae3d0a6e454346f7b02178f0949/Windsurf-linux-x64-1.7.1.tar.gz"
+windsurf_tarball_url: "https://windsurf-stable.codeiumdata.com/linux-x64/stable/619323b3cdd4a88a75f3b5fa39dba02c3b9e14a9/Windsurf-linux-x64-1.7.2.tar.gz"
 windsurf_install_dir: "/opt/windsurf"
 windsurf_binary_path: "{{ windsurf_install_dir }}/Windsurf/windsurf"
 windsurf_icon_dest: "/usr/share/icons/hicolor/256x256/apps/windsurf.png"

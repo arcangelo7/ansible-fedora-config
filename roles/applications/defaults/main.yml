@@ -62,3 +62,6 @@ conky_version: "1.22.1"
 conky_source_url: "https://github.com/brndnmtthws/conky/archive/refs/tags/v{{ conky_version }}.tar.gz"
 conky_build_dir: "/tmp/conky-build" # Directory temporanea per la compilazione
 conky_src_dir: "{{ conky_build_dir }}/conky-{{ conky_version }}" # Directory sorgente estratta
+
+# LibreOffice Flatpak
+libreoffice_flatpak_app_id: "org.libreoffice.LibreOffice"

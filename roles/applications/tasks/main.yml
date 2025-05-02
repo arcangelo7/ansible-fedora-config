@@ -571,6 +571,15 @@
     - applications
     - spotify
 
+# Install LibreOffice Flatpak
+- name: Install LibreOffice Flatpak
+  community.general.flatpak:
+    name: "{{ libreoffice_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - libreoffice
+
 # Install Conky from Source with Lua/Cairo support
 - name: Install Conky build dependencies
   become: true
