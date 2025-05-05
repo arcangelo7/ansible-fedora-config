@@ -109,7 +109,7 @@
     path: "{{ gtile_archive_path }}"
     state: absent
   become: no
-  when: gtile_install_result.changed or "'gTile@vibou' not in gtile_installed_check.stdout" # Clean up if we attempted download/install
+  when: (gtile_install_result is defined and gtile_install_result.changed) or ('gTile@vibou' not in gtile_installed_check.stdout)
   tags:
     - desktop
     - gnome-extensions
@@ -122,7 +122,7 @@
       - "gTile GNOME Shell extension has been installed."
       - "To enable it, you first need to restart GNOME Shell (logout/login or restart the system)."
       - "After restarting, you can enable gTile manually (e.g., via the Extensions app or by running: gnome-extensions enable gTile@vibou)"
-  when: gtile_install_result.changed
+  when: gtile_install_result is defined and gtile_install_result.changed
   tags:
     - desktop
     - gnome-extensions
