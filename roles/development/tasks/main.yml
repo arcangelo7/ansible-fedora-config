@@ -452,6 +452,64 @@
     - python
     - uv
 
+# Install Windsurf AI using YUM repository
+- name: Import Windsurf GPG key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/yum/RPM-GPG-KEY-windsurf
+  become: yes
+  tags:
+    - development
+    - windsurf
+
+- name: Add Windsurf YUM repository
+  ansible.builtin.yum_repository:
+    name: windsurf
+    description: Windsurf Repository
+    baseurl: https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/yum/repo/
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/yum/RPM-GPG-KEY-windsurf
+    state: present
+  become: yes
+  tags:
+    - development
+    - windsurf
+
+- name: Install or Update Windsurf
+  ansible.builtin.dnf:
+    name: windsurf
+    state: latest # Installs if not present, updates to latest if present
+    update_cache: yes # Recommended before installing/updating packages
+  become: yes
+  tags:
+    - development
+    - windsurf
+
+# Ensure Windsurf is accessible from the custom bin_dir if it exists
+- name: Check if Windsurf is in custom bin_dir PATH
+  stat:
+    path: "{{ bin_dir | default('/usr/local/bin') }}/windsurf"
+  register: windsurf_in_custom_path
+  tags:
+    - development
+    - windsurf
+
+- name: Create symbolic link to Windsurf in custom bin_dir if not already present
+  file:
+    src: /usr/bin/windsurf  # Standard path after RPM install
+    dest: "{{ bin_dir | default('/usr/local/bin') }}/windsurf"
+    state: link
+    force: yes # Overwrite if an incorrect link/file exists
+  become: true
+  when:
+    - bin_dir is defined
+    - bin_dir != '/usr/bin' # Only if custom bin_dir is different from where RPM installs
+    - not windsurf_in_custom_path.stat.exists
+  tags:
+    - development
+    - windsurf
+
 # Check if Cursor is already installed
 - name: Check if Cursor AppImage exists
   stat:
@@ -675,217 +733,6 @@
   tags:
     - development
     - cursor
-
-# Install Windsurf AI
-- name: Extract version from windsurf_tarball_url
-  set_fact:
-    new_windsurf_version: "{{ windsurf_tarball_url | regex_search('Windsurf-linux-x64-([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | first }}"
-  tags:
-    - development
-    - windsurf
-
-- name: Check if Windsurf is already installed
-  stat:
-    path: "{{ windsurf_binary_path }}"
-  register: windsurf_check
-  tags:
-    - development
-    - windsurf
-
-- name: Debug windsurf_tarball_url and extracted version
-  debug:
-    msg: 
-      - "URL: {{ windsurf_tarball_url }}"
-      - "Extracted version: {{ new_windsurf_version }}"
-  tags:
-    - development
-    - windsurf
-
-- name: Check if Windsurf version metadata file exists
-  stat:
-    path: "{{ windsurf_metadata_file }}"
-  register: windsurf_metadata_check
-  tags:
-    - development
-    - windsurf
-
-- name: Read installed Windsurf version from metadata file
-  slurp:
-    src: "{{ windsurf_metadata_file }}"
-  register: installed_windsurf_version_raw
-  when: windsurf_metadata_check.stat.exists
-  tags:
-    - development
-    - windsurf
-
-- name: Set installed Windsurf version from metadata
-  set_fact:
-    installed_windsurf_version: "{{ installed_windsurf_version_raw.content | b64decode | trim }}"
-  when: windsurf_metadata_check.stat.exists and installed_windsurf_version_raw is success
-  tags:
-    - development
-    - windsurf
-
-- name: Set default version for Windsurf if no metadata exists
-  set_fact:
-    installed_windsurf_version: "0.0.0"
-  when: not windsurf_metadata_check.stat.exists
-  tags:
-    - development
-    - windsurf
-
-- name: Set version check result for Windsurf
-  set_fact:
-    windsurf_needs_update: "{{ not windsurf_check.stat.exists or (installed_windsurf_version != new_windsurf_version) }}"
-  tags:
-    - development
-    - windsurf
-
-- name: Debug Windsurf update decision
-  debug:
-    msg: "Windsurf needs update: {{ windsurf_needs_update }}"
-  tags:
-    - development
-    - windsurf
-
-- name: Check if Windsurf is in PATH
-  stat:
-    path: "{{ bin_dir | default('/usr/local/bin') }}/windsurf"
-  register: windsurf_in_path
-  tags:
-    - development
-    - windsurf
-
-# Remove old Windsurf version if a different version is being installed
-- name: Remove old Windsurf binary if version is different
-  file:
-    path: "{{ windsurf_binary_path }}"
-    state: absent
-  when: windsurf_check.stat.exists and windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-# Install Windsurf
-- name: Create directory for Windsurf
-  file:
-    path: "{{ windsurf_install_dir }}"
-    state: directory
-    mode: '0755'
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Download Windsurf tarball
-  get_url:
-    url: "{{ windsurf_tarball_url }}"
-    dest: "{{ windsurf_tarball_dest }}"
-    mode: '0644'
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Extract Windsurf tarball
-  unarchive:
-    src: "{{ windsurf_tarball_dest }}"
-    dest: "{{ windsurf_install_dir }}"
-    remote_src: yes
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-# Use the specific Windsurf icon
-- name: Check if Windsurf icon exists at the specific path
-  stat:
-    path: "{{ windsurf_install_dir }}/Windsurf/resources/app/resources/linux/code.png"
-  register: windsurf_specific_icon
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Debug Windsurf icon path
-  debug:
-    msg: "Windsurf icon exists at specific path: {{ windsurf_specific_icon.stat.exists }}"
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Create icons directory if it doesn't exist
-  file:
-    path: "{{ windsurf_icon_dest | dirname }}"
-    state: directory
-    mode: '0755'
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Verify Windsurf icon exists
-  assert:
-    that: windsurf_specific_icon.stat.exists
-    fail_msg: "Windsurf icon not found at {{ windsurf_install_dir }}/Windsurf/resources/app/resources/linux/code.png. Installation cannot continue."
-    success_msg: "Windsurf icon found successfully."
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Copy Windsurf icon to system icons directory
-  copy:
-    src: "{{ windsurf_install_dir }}/Windsurf/resources/app/resources/linux/code.png"
-    dest: "{{ windsurf_icon_dest }}"
-    mode: '0644'
-    remote_src: yes
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Create desktop entry for Windsurf
-  template:
-    src: windsurf.desktop.j2
-    dest: "{{ windsurf_desktop_entry_dest }}"
-    mode: '0644'
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Save new Windsurf version to metadata file
-  copy:
-    content: "{{ new_windsurf_version }}"
-    dest: "{{ windsurf_metadata_file }}"
-    mode: '0644'
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Create symbolic link to Windsurf in PATH
-  file:
-    src: "{{ windsurf_binary_path }}"
-    dest: "{{ bin_dir | default('/usr/local/bin') }}/windsurf"
-    state: link
-    force: yes
-  become: true
-  when: not windsurf_in_path.stat.exists or windsurf_needs_update
-  tags:
-    - development
-    - windsurf
-
-- name: Clean up Windsurf tarball
-  file:
-    path: "{{ windsurf_tarball_dest }}"
-    state: absent
-  when: windsurf_needs_update
-  tags:
-    - development
-    - windsurf
 
 # Flutter SDK installation
 - name: Create development directory

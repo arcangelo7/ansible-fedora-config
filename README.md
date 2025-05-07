@@ -172,11 +172,21 @@ Installs and configures additional applications:
 - Conky system monitor (`tags: applications, conky, conky-config`)
   - Installs Conky and `lm-sensors` (for temperature readings).
   - Deploys the *Hybrid* theme configuration files (`hybrid/hybrid.conf`, `hybrid/lua/hybrid-rings.lua`, fonts, images) to `~/.config/conky/`.
+  - **Resolution Support:** This theme includes configurations for QHD (default) and FHD (1920x1080) resolutions. You can select the desired resolution when running the playbook using the `-e` flag:
+    ```bash
+    # Use QHD configuration (default if variable is omitted)
+    ansible-playbook main.yml --tags conky
+    # Or explicitly
+    ansible-playbook main.yml -e "conky_resolution=qhd" --tags conky
+
+    # Use FHD configuration
+    ansible-playbook main.yml -e "conky_resolution=fhd" --tags conky
+    ```
   - **Important:** After installation, you likely need to run `sudo sensors-detect` once manually and follow its prompts (answering 'yes' is usually safe for standard detection) to ensure all hardware sensors (CPU temp, fans, etc.) are detected correctly. A reboot might be needed afterward.
-  - **Customization:** The provided Conky theme (`hybrid`) is highly personalized and **will likely require manual adjustments** to work correctly on your specific hardware. To make persistent changes, edit the source files within the `hybrid/` directory in this repository:
-    - `hybrid/hybrid.conf`: Modify general layout, fonts, colors, and displayed text information (like network interface names).
-    - `hybrid/lua/hybrid-rings.lua`: Adjust the ring appearance, positioning, and the logic for reading sensor data (especially CPU core count detection and `${platform ...}` arguments which depend on your specific hardware sensors found via the `sensors` command).
-  - Changes made directly to `~/.config/conky/conky.conf` or `~/.config/conky/hybrid/lua/hybrid-rings.lua` will work for testing but will be overwritten if you re-run the Ansible playbook with the `conky` tag.
+  - **Customization:** The provided Conky theme (`hybrid`) is highly personalized and **will likely require manual adjustments** to work correctly on your specific hardware, even after selecting the correct base resolution. To make persistent changes, edit the source files within the `hybrid/` directory in this repository:
+    - `hybrid/hybrid.conf` (QHD) / `hybrid/hybrid-fhd.conf` (FHD): Modify general layout, fonts, colors, and displayed text information (like network interface names).
+    - `hybrid/lua/hybrid-rings.lua` (QHD) / `hybrid/lua/hybrid-rings-fhd.lua` (FHD): Adjust the ring appearance, positioning, and the logic for reading sensor data (especially CPU core count detection and `${platform ...}` arguments which depend on your specific hardware sensors found via the `sensors` command).
+  - Changes made directly to `~/.config/conky/conky.conf` or the Lua script in `~/.config/conky/hybrid/lua/` will work for testing but will be overwritten if you re-run the Ansible playbook with the `conky` tag.
   - **Autostart:** Conky is configured to start automatically on login using a systemd user service (`~/.config/systemd/user/conky.service`).
   - **Disabling Autostart:** If you don't want Conky to start automatically, you can disable the systemd user service by running:
     ```bash

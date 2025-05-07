@@ -739,7 +739,7 @@
   become: false
   become_user: "{{ local_user }}"
   ansible.builtin.copy:
-    src: hybrid/hybrid.conf
+    src: "hybrid/hybrid{% if conky_resolution == 'fhd' %}-fhd{% endif %}.conf"
     dest: "/home/{{ local_user }}/.config/conky/conky.conf"
     mode: '0644'
   tags:
@@ -763,8 +763,8 @@
   become: false
   become_user: "{{ local_user }}"
   ansible.builtin.copy:
-    src: hybrid/lua/hybrid-rings.lua
-    dest: "/home/{{ local_user }}/.config/conky/hybrid/lua/hybrid-rings.lua"
+    src: "hybrid/lua/hybrid-rings{% if conky_resolution == 'fhd' %}-fhd{% endif %}.lua"
+    dest: "/home/{{ local_user }}/.config/conky/hybrid/lua/hybrid-rings{% if conky_resolution == 'fhd' %}-fhd{% endif %}.lua"
     mode: '0644'
   tags:
     - applications

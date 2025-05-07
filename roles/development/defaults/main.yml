@@ -9,15 +9,6 @@ cursor_desktop_entry_dest: "/usr/share/applications/cursor.desktop"
 cursor_metadata_file: "/opt/appimages/cursor.version"
 appimages_dir: "/opt/appimages" 
 
-# Windsurf AI
-windsurf_tarball_url: "https://windsurf-stable.codeiumdata.com/linux-x64/stable/619323b3cdd4a88a75f3b5fa39dba02c3b9e14a9/Windsurf-linux-x64-1.7.2.tar.gz"
-windsurf_install_dir: "/opt/windsurf"
-windsurf_binary_path: "{{ windsurf_install_dir }}/Windsurf/windsurf"
-windsurf_icon_dest: "/usr/share/icons/hicolor/256x256/apps/windsurf.png"
-windsurf_desktop_entry_dest: "/usr/share/applications/windsurf.desktop"
-windsurf_metadata_file: "{{ windsurf_install_dir }}/windsurf.version"
-windsurf_tarball_dest: "/tmp/windsurf.tar.gz"
-
 # uv Python package manager/installer
 uv_version: "0.6.14" # Updated to latest version
 uv_platform: "x86_64-unknown-linux-musl" # Use musl for static linking, better portability
