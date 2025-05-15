@@ -580,6 +580,15 @@
     - applications
     - libreoffice
 
+# Install Brave Browser Flatpak
+- name: Install Brave Browser Flatpak
+  community.general.flatpak:
+    name: "{{ brave_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - brave
+
 # Install Conky from Source with Lua/Cairo support
 - name: Install Conky build dependencies
   become: true
