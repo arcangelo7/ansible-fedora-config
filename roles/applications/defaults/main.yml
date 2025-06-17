@@ -69,3 +69,6 @@ libreoffice_flatpak_app_id: "org.libreoffice.LibreOffice"
 
 # Brave Browser Flatpak
 brave_flatpak_app_id: "com.brave.Browser"
+
+# Zotero Flatpak
+zotero_flatpak_app_id: "org.zotero.Zotero"

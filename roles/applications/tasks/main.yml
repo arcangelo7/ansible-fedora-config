@@ -589,6 +589,15 @@
     - applications
     - brave
 
+# Install Zotero Flatpak
+- name: Install Zotero Flatpak
+  community.general.flatpak:
+    name: "{{ zotero_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - zotero
+
 # Install Conky from Source with Lua/Cairo support
 - name: Install Conky build dependencies
   become: true
