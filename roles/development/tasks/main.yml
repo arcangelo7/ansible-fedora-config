@@ -299,6 +299,15 @@
     - development
     - docker
 
+# Configure Docker credentials with pass
+- name: Include Docker pass configuration tasks
+  include_tasks: docker_pass.yml
+  when: docker_requirements_check is success
+  tags:
+    - development
+    - docker
+    - docker_credentials
+
 # Install pipx for Python package management
 - name: Install pipx
   dnf:

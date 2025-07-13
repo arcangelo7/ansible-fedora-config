@@ -1,0 +1,112 @@
+---
+# Tasks for configuring pass for Docker Desktop on Linux
+
+- name: Install pass package
+  become: true
+  dnf:
+    name: pass
+    state: present
+  tags:
+    - docker
+    - docker_credentials
+
+- name: Check if GPG key exists for current user
+  become: true
+  become_user: "{{ local_user }}"
+  shell: gpg --list-secret-keys | grep -q "{{ local_user }}"
+  register: gpg_key_exists
+  changed_when: false
+  failed_when: false
+  tags:
+    - docker
+    - docker_credentials
+
+- name: Generate GPG key for pass (non-interactive)
+  become: true
+  become_user: "{{ local_user }}"
+  shell: |
+    cat > /tmp/gpg_gen_key << EOF
+    %echo Generating a GPG key for Docker Desktop credentials
+    Key-Type: RSA
+    Key-Length: 3072
+    Name-Real: {{ local_user }}
+    Name-Email: {{ local_user }}@{{ ansible_hostname }}
+    Expire-Date: 0
+    %no-protection
+    %commit
+    %echo Key generation completed
+    EOF
+    gpg --batch --generate-key /tmp/gpg_gen_key
+    rm /tmp/gpg_gen_key
+  when: gpg_key_exists.rc != 0
+  register: gpg_key_generation
+  tags:
+    - docker
+    - docker_credentials
+
+- name: Get GPG key ID
+  become: true
+  become_user: "{{ local_user }}"
+  shell: |
+    # Extract the key ID
+    gpg --list-secret-keys --keyid-format LONG | grep -A1 "sec" | grep -v "sec" | grep -v "\-\-" | head -1 | tr -d ' '
+  register: gpg_key_id
+  changed_when: false
+  failed_when: false
+  tags:
+    - docker
+    - docker_credentials
+
+- name: Debug GPG key ID
+  debug:
+    msg: "Found GPG key ID: {{ gpg_key_id.stdout }}"
+  tags:
+    - docker
+    - docker_credentials
+
+- name: Check if pass is initialized
+  become: true
+  become_user: "{{ local_user }}"
+  stat:
+    path: "/home/{{ local_user }}/.password-store"
+  register: pass_initialized
+  tags:
+    - docker
+    - docker_credentials
+
+- name: Initialize pass with GPG key
+  become: true
+  become_user: "{{ local_user }}"
+  shell: pass init "{{ gpg_key_id.stdout }}"
+  when: 
+    - not pass_initialized.stat.exists
+    - gpg_key_id.stdout | length > 0
+  tags:
+    - docker
+    - docker_credentials
+
+- name: Create Docker config directory
+  become: true
+  become_user: "{{ local_user }}"
+  file:
+    path: "/home/{{ local_user }}/.docker"
+    state: directory
+    mode: '0700'
+  tags:
+    - docker
+    - docker_credentials
+
+- name: Configure Docker to use pass credential store
+  become: true
+  become_user: "{{ local_user }}"
+  copy:
+    dest: "/home/{{ local_user }}/.docker/config.json"
+    content: |
+      {
+        "credsStore": "pass"
+      }
+    mode: '0600'
+    force: no
+  tags:
+    - docker
+    - docker_credentials
