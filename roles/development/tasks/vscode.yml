@@ -1,0 +1,47 @@
+---
+# Install Visual Studio Code
+
+# Import Microsoft GPG key
+- name: Import Microsoft GPG key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://packages.microsoft.com/keys/microsoft.asc
+  become: yes
+  tags:
+    - development
+    - vscode
+
+# Add Visual Studio Code repository
+- name: Add Visual Studio Code repository
+  ansible.builtin.yum_repository:
+    name: code
+    description: Visual Studio Code
+    baseurl: https://packages.microsoft.com/yumrepos/vscode
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+  become: yes
+  tags:
+    - development
+    - vscode
+
+# Install Visual Studio Code
+- name: Install Visual Studio Code
+  ansible.builtin.dnf:
+    name: code
+    state: present
+    update_cache: yes
+  become: yes
+  tags:
+    - development
+    - vscode
+
+# Configure VS Code as default text editor
+- name: Set VS Code as default text editor for text/plain files
+  shell: xdg-mime default code.desktop text/plain
+  become: yes
+  become_user: "{{ local_user }}"
+  tags:
+    - development
+    - vscode

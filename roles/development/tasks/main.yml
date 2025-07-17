@@ -841,3 +841,10 @@
   tags:
     - development
     - flutter
+
+# Install Visual Studio Code
+- name: Install Visual Studio Code
+  import_tasks: vscode.yml
+  tags:
+    - development
+    - vscode
