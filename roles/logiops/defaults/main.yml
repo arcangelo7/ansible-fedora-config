@@ -1,0 +1,5 @@
+---
+# Default configuration for logiops
+logiops_config_template: "logid.cfg.j2"
+logiops_service_enabled: true
+logiops_service_state: started

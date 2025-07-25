@@ -1,0 +1,85 @@
+---
+- name: Install logiops build dependencies
+  dnf:
+    name:
+      - cmake
+      - libevdev-devel
+      - systemd-devel
+      - libconfig-devel
+      - gcc-c++
+      - glib2-devel
+    state: present
+  tags: logiops
+
+- name: Create logiops build directory
+  file:
+    path: /tmp/logiops-build
+    state: directory
+    mode: '0755'
+  tags: logiops
+
+- name: Clone logiops repository
+  git:
+    repo: https://github.com/PixlOne/logiops.git
+    dest: /tmp/logiops-build/logiops
+    force: yes
+  tags: logiops
+
+- name: Create build directory
+  file:
+    path: /tmp/logiops-build/logiops/build
+    state: directory
+    mode: '0755'
+  tags: logiops
+
+- name: Configure logiops build
+  command: cmake -DCMAKE_BUILD_TYPE=Release ..
+  args:
+    chdir: /tmp/logiops-build/logiops/build
+    creates: /tmp/logiops-build/logiops/build/Makefile
+  tags: logiops
+
+- name: Build logiops
+  command: make -j{{ ansible_processor_vcpus }}
+  args:
+    chdir: /tmp/logiops-build/logiops/build
+    creates: /tmp/logiops-build/logiops/build/src/logid/logid
+  tags: logiops
+
+- name: Install logiops
+  command: make install
+  args:
+    chdir: /tmp/logiops-build/logiops/build
+    creates: /usr/local/bin/logid
+  tags: logiops
+
+- name: Create logiops configuration directory
+  file:
+    path: /etc
+    state: directory
+    mode: '0755'
+  tags: logiops
+
+- name: Copy logiops configuration file
+  template:
+    src: logid.cfg.j2
+    dest: /etc/logid.cfg
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart logid
+  tags: logiops
+
+- name: Enable and start logid service
+  systemd:
+    name: logid
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  tags: logiops
+
+- name: Clean up build directory
+  file:
+    path: /tmp/logiops-build
+    state: absent
+  tags: logiops

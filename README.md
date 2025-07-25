@@ -78,6 +78,11 @@ Creates separate subvolumes for `var/cache`, `var/log`, `var/tmp`, etc. and upda
 - Android Studio, Conky monitor
 - Joplin with WebDAV sync
 
+### Logiops
+- Unofficial userspace driver for HID++ Logitech devices
+- Builds from source and configures systemd service
+- Default configuration for MX Master mouse with gestures
+
 ## Customization
 
 Edit `group_vars/workstations.yml`:

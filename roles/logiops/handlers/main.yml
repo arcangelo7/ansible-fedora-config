@@ -1,0 +1,5 @@
+---
+- name: restart logid
+  systemd:
+    name: logid
+    state: restarted
