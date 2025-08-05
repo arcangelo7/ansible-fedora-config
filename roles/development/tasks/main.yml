@@ -842,6 +842,203 @@
     - development
     - flutter
 
+# Install Android Studio
+- name: Check if Android Studio is already installed
+  stat:
+    path: "{{ android_studio_install_dir }}"
+  register: android_studio_installed
+  tags:
+    - development
+    - android_studio
+
+- name: Create temporary directory for Android Studio extraction
+  file:
+    path: "{{ android_studio_tmp_extract_dir }}"
+    state: directory
+    mode: '0755'
+  when: not android_studio_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+
+- name: Download Android Studio tarball
+  get_url:
+    url: "{{ android_studio_download_url }}"
+    dest: "{{ android_studio_tmp_archive }}"
+    mode: '0644'
+  when: not android_studio_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+
+- name: Extract Android Studio tarball
+  unarchive:
+    src: "{{ android_studio_tmp_archive }}"
+    dest: "{{ android_studio_tmp_extract_dir }}"
+    remote_src: yes
+  when: not android_studio_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+
+- name: Move Android Studio to final location
+  command: "mv {{ android_studio_tmp_extract_dir }}/android-studio {{ android_studio_install_dir }}"
+  when: not android_studio_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+
+- name: Create desktop entry for Android Studio
+  template:
+    src: android-studio.desktop.j2
+    dest: "{{ android_studio_desktop_entry_dest }}"
+    mode: '0644'
+  when: not android_studio_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+
+- name: Create symbolic link to Android Studio in PATH
+  file:
+    src: "{{ android_studio_install_dir }}/bin/studio.sh"
+    dest: "{{ bin_dir | default('/usr/local/bin') }}/android-studio"
+    state: link
+  become: true
+  when: not android_studio_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+
+- name: Clean up Android Studio temporary files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ android_studio_tmp_archive }}"
+    - "{{ android_studio_tmp_extract_dir }}"
+  when: not android_studio_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+
+- name: Add Android SDK environment variables to .bashrc
+  lineinfile:
+    path: "/home/{{ local_user }}/.bashrc"
+    line: "{{ item }}"
+    state: present
+  loop:
+    - 'export ANDROID_HOME="$HOME/Android/Sdk"'
+    - 'export PATH="$PATH:$ANDROID_HOME/platform-tools"'
+    - 'export PATH="$PATH:$ANDROID_HOME/tools"'
+    - 'export PATH="$PATH:$ANDROID_HOME/tools/bin"'
+    - 'export PATH="$PATH:$ANDROID_HOME/emulator"'
+    - 'export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin"'
+  tags:
+    - development
+    - android_studio
+
+# Install Android SDK Command-line Tools
+- name: Create Android SDK directory
+  file:
+    path: "{{ android_sdk_dir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ local_user }}"
+    group: "{{ local_user }}"
+  tags:
+    - development
+    - android_studio
+    - android_cmdline_tools
+
+- name: Check if Android SDK Command-line Tools are already installed
+  stat:
+    path: "{{ android_cmdline_tools_dir }}/bin/sdkmanager"
+  register: android_cmdline_tools_installed
+  tags:
+    - development
+    - android_studio
+    - android_cmdline_tools
+
+- name: Download Android SDK Command-line Tools
+  get_url:
+    url: "{{ android_cmdline_tools_url }}"
+    dest: "{{ android_cmdline_tools_archive }}"
+    mode: '0644'
+  when: not android_cmdline_tools_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+    - android_cmdline_tools
+
+- name: Create temporary directory for Command-line Tools extraction
+  file:
+    path: "{{ android_cmdline_tools_extract_dir }}"
+    state: directory
+    mode: '0755'
+  when: not android_cmdline_tools_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+    - android_cmdline_tools
+
+- name: Extract Android SDK Command-line Tools
+  unarchive:
+    src: "{{ android_cmdline_tools_archive }}"
+    dest: "{{ android_cmdline_tools_extract_dir }}"
+    remote_src: yes
+  when: not android_cmdline_tools_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+    - android_cmdline_tools
+
+- name: Create cmdline-tools directory structure
+  file:
+    path: "{{ android_cmdline_tools_dir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ local_user }}"
+    group: "{{ local_user }}"
+  when: not android_cmdline_tools_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+    - android_cmdline_tools
+
+- name: Move Command-line Tools to final location
+  shell: "mv {{ android_cmdline_tools_extract_dir }}/cmdline-tools/* {{ android_cmdline_tools_dir }}/"
+  when: not android_cmdline_tools_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+    - android_cmdline_tools
+
+- name: Set ownership of Android SDK directory
+  file:
+    path: "{{ android_sdk_dir }}"
+    state: directory
+    recurse: yes
+    owner: "{{ local_user }}"
+    group: "{{ local_user }}"
+  when: not android_cmdline_tools_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+    - android_cmdline_tools
+
+- name: Clean up Command-line Tools temporary files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ android_cmdline_tools_archive }}"
+    - "{{ android_cmdline_tools_extract_dir }}"
+  when: not android_cmdline_tools_installed.stat.exists
+  tags:
+    - development
+    - android_studio
+    - android_cmdline_tools
+
 # Install Visual Studio Code
 - name: Install Visual Studio Code
   import_tasks: vscode.yml

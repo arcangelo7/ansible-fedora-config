@@ -2,7 +2,7 @@
 # Default variables for development role
 
 # Cursor AppImage
-cursor_appimage_url: "https://downloads.cursor.com/production/faa03b17cce93e8a80b7d62d57f5eda6bb6ab9fa/linux/x64/Cursor-1.2.2-x86_64.AppImage"
+cursor_appimage_url: "https://downloads.cursor.com/production/54c27320fab08c9f5dd5873f07fca101f7a3e076/linux/x64/Cursor-1.3.9-x86_64.AppImage"
 cursor_appimage_dest: "/opt/appimages/Cursor.AppImage"
 cursor_icon_dest: "/usr/share/icons/hicolor/256x256/apps/cursor.png"
 cursor_desktop_entry_dest: "/usr/share/applications/cursor.desktop"
@@ -17,3 +17,19 @@ uv_checksum: "sha256:0cac4df0cb3457b154f2039ae471e89cd4e15f3bd790bbb3cb0b8b40d94
 uv_install_path: "/usr/local/bin/uv"
 uv_tmp_archive: "/tmp/uv-{{ uv_version }}.tar.gz"
 uv_tmp_extract_dir: "/tmp/uv-{{ uv_version }}-extract"
+
+# Android Studio
+android_studio_version: "2024.2.1.11"
+android_studio_download_url: "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/{{ android_studio_version }}/android-studio-{{ android_studio_version }}-linux.tar.gz"
+android_studio_install_dir: "/opt/android-studio"
+android_studio_desktop_entry_dest: "/usr/share/applications/android-studio.desktop"
+android_studio_tmp_archive: "/tmp/android-studio-{{ android_studio_version }}.tar.gz"
+android_studio_tmp_extract_dir: "/tmp/android-studio-extract"
+
+# Android SDK Command-line Tools
+android_cmdline_tools_version: "11076708"  # Latest version as of 2024
+android_cmdline_tools_url: "https://dl.google.com/android/repository/commandlinetools-linux-{{ android_cmdline_tools_version }}_latest.zip"
+android_cmdline_tools_archive: "/tmp/commandlinetools-linux-{{ android_cmdline_tools_version }}.zip"
+android_cmdline_tools_extract_dir: "/tmp/cmdline-tools-extract"
+android_sdk_dir: "/home/{{ local_user }}/Android/Sdk"
+android_cmdline_tools_dir: "{{ android_sdk_dir }}/cmdline-tools/latest"
