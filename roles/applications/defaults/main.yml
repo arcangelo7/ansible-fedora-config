@@ -72,3 +72,10 @@ brave_flatpak_app_id: "com.brave.Browser"
 
 # Zotero Flatpak
 zotero_flatpak_app_id: "org.zotero.Zotero"
+
+# Portfolio Flutter App
+portfolio_version: "1.2.0"
+portfolio_download_url: "https://github.com/arcangelo7/portfolio/releases/download/v{{portfolio_version}}/portfolio-linux-{{portfolio_version}}.tar.gz"
+portfolio_archive: "/tmp/portfolio-linux-{{ portfolio_version }}.tar.gz"
+portfolio_extract_dir: "/tmp/portfolio-extract"
+portfolio_metadata_file: "/opt/appimages/portfolio.version"

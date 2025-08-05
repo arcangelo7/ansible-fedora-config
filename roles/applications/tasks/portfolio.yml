@@ -1,0 +1,147 @@
+---
+# Portfolio Flutter App Installation
+
+- name: Check if Portfolio app is already installed
+  stat:
+    path: "/home/{{ local_user }}/.local/share/portfolio/portfolio"
+  register: portfolio_binary_check
+  tags:
+    - applications
+    - portfolio
+
+- name: Check if Portfolio version metadata file exists
+  stat:
+    path: "{{ portfolio_metadata_file }}"
+  register: portfolio_metadata_check
+  tags:
+    - applications
+    - portfolio
+
+- name: Read installed Portfolio version from metadata file
+  slurp:
+    src: "{{ portfolio_metadata_file }}"
+  register: installed_portfolio_version_raw
+  when: portfolio_metadata_check.stat.exists
+  tags:
+    - applications
+    - portfolio
+
+- name: Set installed Portfolio version from metadata
+  set_fact:
+    installed_portfolio_version: "{{ installed_portfolio_version_raw.content | b64decode | trim }}"
+  when: portfolio_metadata_check.stat.exists and installed_portfolio_version_raw is success
+  tags:
+    - applications
+    - portfolio
+
+- name: Set default version for Portfolio if no metadata exists
+  set_fact:
+    installed_portfolio_version: "0.0.0"
+  when: not portfolio_metadata_check.stat.exists
+  tags:
+    - applications
+    - portfolio
+
+- name: Debug version comparison
+  debug:
+    msg:
+      - "Installed Portfolio version: {{ installed_portfolio_version | default('unknown') }}"
+      - "New Portfolio version: {{ portfolio_version }}"
+  tags:
+    - applications
+    - portfolio
+
+- name: Set version check result
+  set_fact:
+    portfolio_needs_update: "{{ not portfolio_binary_check.stat.exists or installed_portfolio_version != portfolio_version }}"
+  tags:
+    - applications
+    - portfolio
+
+- name: Debug update decision
+  debug:
+    msg: "Portfolio needs update: {{ portfolio_needs_update }}"
+  tags:
+    - applications
+    - portfolio
+
+- name: Download Portfolio Linux tarball
+  get_url:
+    url: "{{ portfolio_download_url }}"
+    dest: "{{ portfolio_archive }}"
+    mode: '0644'
+  when: portfolio_needs_update
+  tags:
+    - applications
+    - portfolio
+
+- name: Create temporary extraction directory
+  file:
+    path: "{{ portfolio_extract_dir }}"
+    state: directory
+    mode: '0755'
+  when: portfolio_needs_update
+  tags:
+    - applications
+    - portfolio
+
+- name: Extract Portfolio tarball
+  unarchive:
+    src: "{{ portfolio_archive }}"
+    dest: "{{ portfolio_extract_dir }}"
+    remote_src: yes
+  when: portfolio_needs_update
+  tags:
+    - applications
+    - portfolio
+
+- name: Make install script executable
+  file:
+    path: "{{ portfolio_extract_dir }}/install.sh"
+    mode: '0755'
+  when: portfolio_needs_update
+  tags:
+    - applications
+    - portfolio
+
+- name: Run Portfolio installation script
+  shell: |
+    cd "{{ portfolio_extract_dir }}"
+    echo "N" | ./install.sh
+  become_user: "{{ local_user }}"
+  when: portfolio_needs_update
+  tags:
+    - applications
+    - portfolio
+
+- name: Create directory for metadata file
+  file:
+    path: "{{ portfolio_metadata_file | dirname }}"
+    state: directory
+    mode: '0755'
+  when: portfolio_needs_update
+  tags:
+    - applications
+    - portfolio
+
+- name: Save new Portfolio version to metadata file
+  copy:
+    content: "{{ portfolio_version }}"
+    dest: "{{ portfolio_metadata_file }}"
+    mode: '0644'
+  when: portfolio_needs_update
+  tags:
+    - applications
+    - portfolio
+
+- name: Clean up temporary files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ portfolio_archive }}"
+    - "{{ portfolio_extract_dir }}"
+  when: portfolio_needs_update
+  tags:
+    - applications
+    - portfolio

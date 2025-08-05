@@ -884,3 +884,9 @@
     - conky
     - conky-config
     - conky-autostart
+
+- name: Install Portfolio Flutter App
+  import_tasks: portfolio.yml
+  tags:
+    - applications
+    - portfolio
