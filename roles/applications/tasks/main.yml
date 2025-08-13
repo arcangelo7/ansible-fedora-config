@@ -885,6 +885,16 @@
     - conky-config
     - conky-autostart
 
+# Install TeXLive packages
+- name: Install TeXLive packages
+  dnf:
+    name: "{{ texlive_packages }}"
+    state: present
+  tags:
+    - applications
+    - texlive
+    - latex
+
 - name: Install Portfolio Flutter App
   import_tasks: portfolio.yml
   tags:
