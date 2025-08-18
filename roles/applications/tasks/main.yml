@@ -895,6 +895,16 @@
     - texlive
     - latex
 
+# Install Okular PDF viewer
+- name: Install Okular PDF viewer
+  dnf:
+    name: "{{ okular_package_name }}"
+    state: present
+  tags:
+    - applications
+    - okular
+    - pdf
+
 - name: Install Portfolio Flutter App
   import_tasks: portfolio.yml
   tags:

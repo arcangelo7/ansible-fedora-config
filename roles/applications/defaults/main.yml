@@ -1,34 +1,24 @@
 ---
 # Default variables for applications role
 
-# Discord Flatpak
 discord_flatpak_app_id: "com.discordapp.Discord" 
 
-# Firefox Flatpak
 firefox_flatpak_app_id: "org.mozilla.firefox"
 
-# VLC Flatpak
 vlc_flatpak_app_id: "org.videolan.VLC" 
 
-# Drawing Flatpak
 drawing_flatpak_app_id: "com.github.maoschanz.drawing"
 
-# Zoom Flatpak
 zoom_flatpak_app_id: "us.zoom.Zoom"
 
-# Remmina Flatpak
 remmina_flatpak_app_id: "org.remmina.Remmina"
 
-# Stremio Flatpak
 stremio_flatpak_app_id: "com.stremio.Stremio"
 
-# Telegram Flatpak
 telegram_flatpak_app_id: "org.telegram.desktop"
 
-# Spotify Flatpak
 spotify_flatpak_app_id: "com.spotify.Client"
 
-# Joplin AppImage
 joplin_appimage_url: "https://github.com/laurent22/joplin/releases/download/v3.2.13/Joplin-3.2.13.AppImage"
 joplin_appimage_dest: "/opt/appimages/Joplin.AppImage"
 joplin_icon_dest: "/usr/share/icons/hicolor/256x256/apps/joplin.png"
@@ -37,51 +27,42 @@ joplin_metadata_file: "/opt/appimages/joplin.version"
 appimages_dir: "/opt/appimages"
 bin_dir: "/usr/local/bin"
 
-# Joplin CLI - Sincronizzazione
 joplin_sync_target: 5  # 5 per WebDAV
 joplin_sync_webdav_path: "https://cloud.arcangelomassari.com/remote.php/dav/files/arcangelo/Documents/Joplin/"
 joplin_sync_webdav_username: "arcangelo"
 joplin_sync_webdav_password: "{{ vault_joplin_webdav_password | default('') }}"  # Da definire in .env
 
-# Jimmy CLI
 jimmy_download_url: "https://github.com/marph91/jimmy/releases/latest/download/jimmy-cli-linux"
 jimmy_install_path: "/usr/local/bin/jimmy"
 
-# Btrfs Assistant
 btrfs_assistant_package_name: "btrfs-assistant"
 
-# Google Chrome
 google_chrome_repo_url: "https://dl.google.com/linux/chrome/rpm/stable/x86_64"
 google_chrome_package_name: "google-chrome-stable"
 
-# Android Studio Flatpak
 android_studio_flatpak_app_id: "com.google.AndroidStudio"
 
-# Conky Build from Source
 conky_version: "1.22.1"
 conky_source_url: "https://github.com/brndnmtthws/conky/archive/refs/tags/v{{ conky_version }}.tar.gz"
-conky_build_dir: "/tmp/conky-build" # Directory temporanea per la compilazione
-conky_src_dir: "{{ conky_build_dir }}/conky-{{ conky_version }}" # Directory sorgente estratta
-conky_resolution: "qhd" # Default resolution (options: qhd, fhd)
+conky_build_dir: "/tmp/conky-build"
+conky_src_dir: "{{ conky_build_dir }}/conky-{{ conky_version }}"
+conky_resolution: "qhd"
 
-# LibreOffice Flatpak
 libreoffice_flatpak_app_id: "org.libreoffice.LibreOffice"
 
-# Brave Browser Flatpak
 brave_flatpak_app_id: "com.brave.Browser"
 
-# Zotero Flatpak
 zotero_flatpak_app_id: "org.zotero.Zotero"
 
-# Portfolio Flutter App
 portfolio_version: "1.8.4"
 portfolio_download_url: "https://github.com/arcangelo7/portfolio/releases/download/v{{portfolio_version}}/portfolio-linux-{{portfolio_version}}.tar.gz"
 portfolio_archive: "/tmp/portfolio-linux-{{ portfolio_version }}.tar.gz"
 portfolio_extract_dir: "/tmp/portfolio-extract"
 portfolio_metadata_file: "/opt/appimages/portfolio.version"
 
-# TeXLive - Minimal Fedora packages for LaTeX + VSCode workflow
 texlive_packages:
-  - "texlive-collection-latex"            # LaTeX fundamental packages
-  - "texlive-collection-latexrecommended" # LaTeX recommended packages
-  - "latexmk"                             # Build automation
+  - "texlive-collection-latex"
+  - "texlive-collection-latexrecommended"
+  - "latexmk"
+
+okular_package_name: "okular"
