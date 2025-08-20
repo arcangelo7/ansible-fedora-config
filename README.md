@@ -2,7 +2,7 @@
 
 ![Configured Desktop Preview](preview.png)
 
-Ansible playbooks to automatically configure a Fedora system with personal settings.
+Ansible playbooks to automatically configure a Fedora system with my personal settings.
 
 ## Prerequisites
 

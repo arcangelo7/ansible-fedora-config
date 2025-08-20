@@ -32,7 +32,7 @@ joplin_sync_webdav_path: "https://cloud.arcangelomassari.com/remote.php/dav/file
 joplin_sync_webdav_username: "arcangelo"
 joplin_sync_webdav_password: "{{ vault_joplin_webdav_password | default('') }}"  # Da definire in .env
 
-jimmy_download_url: "https://github.com/marph91/jimmy/releases/latest/download/jimmy-cli-linux"
+jimmy_download_url: "https://github.com/marph91/jimmy/releases/latest/download/jimmy-linux"
 jimmy_install_path: "/usr/local/bin/jimmy"
 
 btrfs_assistant_package_name: "btrfs-assistant"
