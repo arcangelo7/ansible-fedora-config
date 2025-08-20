@@ -1,7 +1,4 @@
 ---
-# Install development tools
-
-# Add GitHub CLI repository
 - name: Add GitHub CLI repository
   command: dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/rpm/gh-cli.repo
   args:
@@ -10,8 +7,6 @@
     - development
     - packages
     - github-cli
-
-# Install development tools
 - name: Install development tools
   dnf:
     name: "{{ development_packages }}"
@@ -19,16 +14,12 @@
   tags:
     - development
     - packages
-
-# Install Java and Maven
 - name: Install Java and Maven
   import_tasks: java_maven.yml
   tags:
     - development
     - java
     - maven
-
-# Check current Git configurations
 - name: Check current Git username
   shell: git config --global user.name
   register: current_git_username
@@ -64,8 +55,6 @@
   tags:
     - development
     - git
-
-# Configure Git only if needed
 - name: Configure Git - username
   git_config:
     name: user.name
@@ -101,8 +90,6 @@
   tags:
     - development
     - git
-
-# Verify requirements for Docker Desktop
 - name: Check if system is 64-bit
   shell: uname -m
   register: architecture
@@ -202,13 +189,11 @@
     - development
     - docker
     - docker_requirements
-
-# Install Docker Desktop
 - name: Check if Docker Desktop is already installed
   stat:
     path: /opt/docker-desktop
   register: docker_desktop_check
-  check_mode: no  # Run even in check mode
+  check_mode: no
   tags:
     - development
     - docker
@@ -218,12 +203,10 @@
   register: docker_group
   changed_when: false
   failed_when: false
-  check_mode: no  # Run even in check mode
+  check_mode: no
   tags:
     - development
     - docker
-
-# Use official Docker repository setup approach
 - name: Install dnf-plugins-core
   command: dnf -y install dnf-plugins-core
   args:
@@ -274,8 +257,6 @@
   tags:
     - development
     - docker
-
-# Check if user is already in docker group
 - name: Check if user is in docker group
   shell: id -nG {{ ansible_user_id }} | grep -o docker
   register: user_in_docker_group
@@ -298,8 +279,6 @@
   tags:
     - development
     - docker
-
-# Configure Docker credentials with pass
 - name: Include Docker pass configuration tasks
   include_tasks: docker_pass.yml
   when: docker_requirements_check is success
@@ -307,8 +286,6 @@
     - development
     - docker
     - docker_credentials
-
-# Install pipx for Python package management
 - name: Install pipx
   dnf:
     name: pipx
@@ -330,8 +307,6 @@
   tags:
     - development
     - python
-
-# Install Poetry using pipx
 - name: Check if Poetry is installed
   become: yes
   become_user: "{{ local_user }}"
@@ -359,8 +334,6 @@
   tags:
     - development
     - python
-
-# Install uv (fast Python package manager)
 - name: Check if uv is already installed at {{ uv_install_path }}
   stat:
     path: "{{ uv_install_path }}"
@@ -375,7 +348,7 @@
   register: uv_current_version_output
   when: uv_binary_check.stat.exists
   changed_when: false
-  failed_when: false # Don't fail if the command fails
+  failed_when: false
   check_mode: no
   tags:
     - development
@@ -460,8 +433,6 @@
     - development
     - python
     - uv
-
-# Install Windsurf AI using YUM repository
 - name: Import Windsurf GPG key
   ansible.builtin.rpm_key:
     state: present
@@ -488,14 +459,12 @@
 - name: Install or Update Windsurf
   ansible.builtin.dnf:
     name: windsurf
-    state: latest # Installs if not present, updates to latest if present
-    update_cache: yes # Recommended before installing/updating packages
+    state: latest
+    update_cache: yes
   become: yes
   tags:
     - development
     - windsurf
-
-# Ensure Windsurf is accessible from the custom bin_dir if it exists
 - name: Check if Windsurf is in custom bin_dir PATH
   stat:
     path: "{{ bin_dir | default('/usr/local/bin') }}/windsurf"
@@ -506,20 +475,18 @@
 
 - name: Create symbolic link to Windsurf in custom bin_dir if not already present
   file:
-    src: /usr/bin/windsurf  # Standard path after RPM install
+    src: /usr/bin/windsurf
     dest: "{{ bin_dir | default('/usr/local/bin') }}/windsurf"
     state: link
-    force: yes # Overwrite if an incorrect link/file exists
+    force: yes
   become: true
   when:
     - bin_dir is defined
-    - bin_dir != '/usr/bin' # Only if custom bin_dir is different from where RPM installs
+    - bin_dir != '/usr/bin'
     - not windsurf_in_custom_path.stat.exists
   tags:
     - development
     - windsurf
-
-# Check if Cursor is already installed
 - name: Check if Cursor AppImage exists
   stat:
     path: "{{ cursor_appimage_dest }}"
@@ -608,7 +575,6 @@
     - development
     - cursor
 
-# Remove old Cursor version if a different version is being installed
 - name: Remove old Cursor AppImage if version is different
   file:
     path: "{{ cursor_appimage_dest }}"
@@ -617,8 +583,6 @@
   tags:
     - development
     - cursor
-
-# Install Cursor AppImage
 - name: Create directory for AppImages
   file:
     path: "{{ appimages_dir }}"
@@ -710,8 +674,6 @@
   tags:
     - development
     - cursor
-
-# Add Cursor to PATH
 - name: Create bin directory if it doesn't exist
   file:
     path: "{{ bin_dir | default('/usr/local/bin') }}"
@@ -742,8 +704,6 @@
   tags:
     - development
     - cursor
-
-# Flutter SDK installation
 - name: Create development directory
   file:
     path: "/home/{{ local_user }}/development"
@@ -795,7 +755,6 @@
     - development
     - flutter
 
-# Clean up Flutter tarball
 - name: Clean up Flutter tarball
   file:
     path: "/tmp/flutter_linux_3.29.2-stable.tar.xz"
@@ -804,8 +763,6 @@
   tags:
     - development
     - flutter
-
-# Configure Flutter settings
 - name: Check Flutter analytics status
   become_user: "{{ local_user }}"
   shell: |
@@ -825,8 +782,6 @@
   tags:
     - development
     - flutter
-
-# Install required Linux dependencies for Flutter development
 - name: Install Flutter Linux development dependencies
   dnf:
     name:
@@ -841,8 +796,13 @@
   tags:
     - development
     - flutter
-
-# Install Android Studio
+- name: Install Flutter additional packages
+  dnf:
+    name: "{{ flutter_packages }}"
+    state: present
+  tags:
+    - development
+    - flutter
 - name: Check if Android Studio is already installed
   stat:
     path: "{{ android_studio_install_dir }}"
@@ -936,8 +896,6 @@
   tags:
     - development
     - android_studio
-
-# Install Android SDK Command-line Tools
 - name: Create Android SDK directory
   file:
     path: "{{ android_sdk_dir }}"
@@ -1038,8 +996,6 @@
     - development
     - android_studio
     - android_cmdline_tools
-
-# Install Visual Studio Code
 - name: Install Visual Studio Code
   import_tasks: vscode.yml
   tags:
