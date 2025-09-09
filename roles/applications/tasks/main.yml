@@ -507,6 +507,45 @@
     - applications
     - vpn
 
+# Install Mullvad VPN
+- name: Check Fedora version for Mullvad repository
+  command: rpm -E %fedora
+  register: fedora_version
+  changed_when: false
+  tags:
+    - applications
+    - vpn
+    - mullvad
+
+- name: Add Mullvad VPN repository (Fedora 41+)
+  command: dnf config-manager addrepo --from-repofile=https://repository.mullvad.net/rpm/stable/mullvad.repo
+  args:
+    creates: /etc/yum.repos.d/mullvad.repo
+  when: fedora_version.stdout|int >= 41
+  tags:
+    - applications
+    - vpn
+    - mullvad
+
+- name: Add Mullvad VPN repository (Fedora 40 and earlier)
+  command: dnf config-manager --add-repo https://repository.mullvad.net/rpm/stable/mullvad.repo
+  args:
+    creates: /etc/yum.repos.d/mullvad.repo
+  when: fedora_version.stdout|int <= 40
+  tags:
+    - applications
+    - vpn
+    - mullvad
+
+- name: Install Mullvad VPN package
+  dnf:
+    name: mullvad-vpn
+    state: present
+  tags:
+    - applications
+    - vpn
+    - mullvad
+
 # Install Btrfs Assistant
 - name: Install Btrfs Assistant package
   dnf:
