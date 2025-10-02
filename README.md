@@ -61,13 +61,13 @@ Creates separate subvolumes for `var/cache`, `var/log`, `var/tmp`, etc. and upda
 - System update and base packages
 - Cleanup of bloatware packages
 
-### Development  
+### Development
 - Development tools (gcc, make, etc.)
 - Git configuration
 - Docker Desktop
-- VS Code, Cursor, Windsurf editors
+- VS Code editor
 - Python tools (pipx, poetry, uv)
-- Java/Maven, Flutter SDK
+- Java/Maven, Flutter SDK, Android Studio
 
 ### Desktop
 - GNOME themes and extensions
@@ -75,7 +75,7 @@ Creates separate subvolumes for `var/cache`, `var/log`, `var/tmp`, etc. and upda
 
 ### Applications
 - Firefox, Discord, VLC, Zoom
-- Android Studio, Conky monitor
+- Conky system monitor
 - Joplin with WebDAV sync
 
 ### Logiops
