@@ -87,16 +87,6 @@
     - applications
     - telegram
 
-# Install Android Studio Flatpak
-- name: Install Android Studio Flatpak
-  community.general.flatpak:
-    name: "{{ android_studio_flatpak_app_id }}"
-    state: present
-  tags:
-    - applications
-    - development
-    - android-studio
-
 # Install Joplin AppImage
 # Check if Joplin is already installed
 - name: Check if Joplin AppImage exists
