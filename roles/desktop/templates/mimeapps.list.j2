@@ -1,0 +1,21 @@
+[Default Applications]
+# Video associations
+{% for mime_type in video_mime_types %}
+{{ mime_type }}={{ video_player_app }}
+{% endfor %}
+
+# Text and code associations
+{% for mime_type in text_mime_types %}
+{{ mime_type }}={{ text_editor_app }}
+{% endfor %}
+
+[Added Associations]
+# Video associations
+{% for mime_type in video_mime_types %}
+{{ mime_type }}={{ video_player_app }};
+{% endfor %}
+
+# Text and code associations
+{% for mime_type in text_mime_types %}
+{{ mime_type }}={{ text_editor_app }};
+{% endfor %}

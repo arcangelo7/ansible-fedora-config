@@ -479,3 +479,15 @@
     - desktop
     - background
     - gnome-settings
+
+# Configure default applications via mimeapps.list
+- name: Deploy mimeapps.list for default applications
+  template:
+    src: mimeapps.list.j2
+    dest: "/home/{{ local_user }}/.config/mimeapps.list"
+    mode: '0644'
+  become: no
+  tags:
+    - desktop
+    - mimeapps
+    - default-apps

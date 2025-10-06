@@ -1,0 +1,36 @@
+---
+# Default MIME type associations
+
+video_player_app: "org.videolan.VLC.desktop"
+
+video_mime_types:
+  - "video/mp4"
+  - "video/x-matroska"          # MKV
+  - "video/quicktime"            # MOV
+  - "video/x-msvideo"            # AVI
+  - "video/webm"
+  - "video/mpeg"
+  - "video/x-flv"
+  - "video/3gpp"
+  - "video/ogg"
+  - "video/x-ms-wmv"
+
+text_editor_app: "code.desktop"
+
+text_mime_types:
+  - "text/plain"
+  - "text/markdown"
+  - "text/x-python"
+  - "text/x-java"
+  - "text/x-c"
+  - "text/x-c++"
+  - "text/x-shellscript"
+  - "text/javascript"
+  - "text/css"
+  - "text/html"
+  - "application/json"
+  - "application/xml"
+  - "application/x-yaml"
+  - "text/x-ruby"
+  - "text/x-go"
+  - "text/x-rust"

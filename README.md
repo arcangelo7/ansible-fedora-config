@@ -24,15 +24,15 @@ Ansible playbooks to automatically configure a Fedora system with my personal se
 2. Run specific tags:
    ```bash
    # System and base packages
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "system,base-packages"
-   
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "system,base-packages"
+
    # Development tools
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "development"
-   
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "development"
+
    # Desktop environment
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "desktop"
-   
-   # Applications (requires vault)
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "desktop"
+
+   # Applications
    ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "applications"
    ```
 
@@ -72,6 +72,8 @@ Creates separate subvolumes for `var/cache`, `var/log`, `var/tmp`, etc. and upda
 ### Desktop
 - GNOME themes and extensions
 - Flatpak setup
+- Default applications configuration (MIME types)
+- Monitor brightness control (ddcutil/ddcui)
 
 ### Applications
 - Firefox, Discord, VLC, Zoom
@@ -89,6 +91,32 @@ Edit `group_vars/workstations.yml`:
 - `local_user`: Your username
 - `git_config`: Git settings (name, email, editor)
 - Package lists for customization
+
+### Default Applications (MIME Types)
+
+Configure default applications in `roles/desktop/defaults/main.yml`:
+
+```yaml
+# Video player (default: VLC)
+video_player_app: "org.videolan.VLC.desktop"
+
+# Text editor (default: VS Code)
+text_editor_app: "code.desktop"
+
+# Add/remove video MIME types
+video_mime_types:
+  - "video/mp4"
+  - "video/x-matroska"  # MKV
+  # ... add more
+
+# Add/remove text MIME types
+text_mime_types:
+  - "text/plain"
+  - "text/markdown"
+  # ... add more
+```
+
+Run with: `ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags desktop,mimeapps`
 
 ### Joplin WebDAV Setup
 
