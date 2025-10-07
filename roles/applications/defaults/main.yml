@@ -40,8 +40,6 @@ btrfs_assistant_package_name: "btrfs-assistant"
 google_chrome_repo_url: "https://dl.google.com/linux/chrome/rpm/stable/x86_64"
 google_chrome_package_name: "google-chrome-stable"
 
-android_studio_flatpak_app_id: "com.google.AndroidStudio"
-
 conky_version: "1.22.1"
 conky_source_url: "https://github.com/brndnmtthws/conky/archive/refs/tags/v{{ conky_version }}.tar.gz"
 conky_build_dir: "/tmp/conky-build"
