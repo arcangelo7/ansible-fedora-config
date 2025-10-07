@@ -76,9 +76,15 @@ Creates separate subvolumes for `var/cache`, `var/log`, `var/tmp`, etc. and upda
 - Monitor brightness control (ddcutil/ddcui)
 
 ### Applications
-- Firefox, Discord, VLC, Zoom
-- Conky system monitor
-- Joplin with WebDAV sync
+- Communication: Discord, Telegram, Zoom
+- Media: VLC, Spotify, Stremio
+- Browsers: Google Chrome, Brave
+- Graphics: Pinta, Inkscape
+- Productivity: LibreOffice, Zotero, Joplin (AppImage and CLI with WebDAV sync)
+- System: Conky system monitor, Btrfs Assistant, Okular PDF viewer
+- Development: TeXLive
+- VPN: Mullvad VPN, openfortivpn
+- Tools: Jimmy CLI, Portfolio
 
 ### Logiops
 - Unofficial userspace driver for HID++ Logitech devices
@@ -103,18 +109,20 @@ video_player_app: "org.videolan.VLC.desktop"
 # Text editor (default: VS Code)
 text_editor_app: "code.desktop"
 
-# Add/remove video MIME types
-video_mime_types:
-  - "video/mp4"
-  - "video/x-matroska"  # MKV
-  # ... add more
+# Image editor (default: Pinta)
+image_editor_app: "com.github.PintaProject.Pinta.desktop"
 
-# Add/remove text MIME types
-text_mime_types:
-  - "text/plain"
-  - "text/markdown"
-  # ... add more
+# Vector graphics (default: Inkscape)
+vector_graphics_app: "org.inkscape.Inkscape.desktop"
+
+# PDF viewer (default: Okular)
+pdf_viewer_app: "okularApplication_pdf.desktop"
+
+# Office suite (default: LibreOffice)
+office_suite_app: "org.libreoffice.LibreOffice.desktop"
 ```
+
+Each application handles specific MIME types (video, text, images, SVG, PDF, office documents). Modify the corresponding `*_mime_types` lists to customize.
 
 Run with: `ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags desktop,mimeapps`
 

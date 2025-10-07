@@ -9,6 +9,26 @@
 {{ mime_type }}={{ text_editor_app }}
 {% endfor %}
 
+# Image associations
+{% for mime_type in image_mime_types %}
+{{ mime_type }}={{ image_editor_app }}
+{% endfor %}
+
+# Vector graphics associations
+{% for mime_type in vector_graphics_mime_types %}
+{{ mime_type }}={{ vector_graphics_app }}
+{% endfor %}
+
+# PDF associations
+{% for mime_type in pdf_mime_types %}
+{{ mime_type }}={{ pdf_viewer_app }}
+{% endfor %}
+
+# Office document associations
+{% for mime_type in document_mime_types %}
+{{ mime_type }}={{ office_suite_app }}
+{% endfor %}
+
 [Added Associations]
 # Video associations
 {% for mime_type in video_mime_types %}
@@ -18,4 +38,24 @@
 # Text and code associations
 {% for mime_type in text_mime_types %}
 {{ mime_type }}={{ text_editor_app }};
+{% endfor %}
+
+# Image associations
+{% for mime_type in image_mime_types %}
+{{ mime_type }}={{ image_editor_app }};
+{% endfor %}
+
+# Vector graphics associations
+{% for mime_type in vector_graphics_mime_types %}
+{{ mime_type }}={{ vector_graphics_app }};
+{% endfor %}
+
+# PDF associations
+{% for mime_type in pdf_mime_types %}
+{{ mime_type }}={{ pdf_viewer_app }};
+{% endfor %}
+
+# Office document associations
+{% for mime_type in document_mime_types %}
+{{ mime_type }}={{ office_suite_app }};
 {% endfor %}

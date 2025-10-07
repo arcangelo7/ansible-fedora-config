@@ -23,7 +23,6 @@
     - applications
     - discord
 
-# Install Discord Flatpak
 - name: Install Discord Flatpak
   community.general.flatpak:
     name: "{{ discord_flatpak_app_id }}"
@@ -32,7 +31,6 @@
     - applications
     - discord
 
-# Install VLC Flatpak
 - name: Install VLC Flatpak
   community.general.flatpak:
     name: "{{ vlc_flatpak_app_id }}"
@@ -41,16 +39,22 @@
     - applications
     - vlc
 
-# Install Drawing Flatpak
-- name: Install Drawing Flatpak
+- name: Install Pinta Flatpak
   community.general.flatpak:
-    name: "{{ drawing_flatpak_app_id }}"
+    name: "{{ pinta_flatpak_app_id }}"
     state: present
   tags:
     - applications
-    - drawing
+    - pinta
 
-# Install Zoom Flatpak
+- name: Install Inkscape Flatpak
+  community.general.flatpak:
+    name: "{{ inkscape_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - inkscape
+
 - name: Install Zoom Flatpak
   community.general.flatpak:
     name: "{{ zoom_flatpak_app_id }}"
@@ -59,17 +63,6 @@
     - applications
     - zoom
 
-# Install Remmina Flatpak for remote desktop connections
-- name: Install Remmina Flatpak
-  community.general.flatpak:
-    name: "{{ remmina_flatpak_app_id }}"
-    state: present
-  tags:
-    - applications
-    - remmina
-    - remote-desktop
-
-# Install Stremio Flatpak
 - name: Install Stremio Flatpak
   community.general.flatpak:
     name: "{{ stremio_flatpak_app_id }}"
@@ -78,7 +71,6 @@
     - applications
     - stremio
 
-# Install Telegram Flatpak
 - name: Install Telegram Flatpak
   community.general.flatpak:
     name: "{{ telegram_flatpak_app_id }}"
@@ -591,7 +583,6 @@
     - applications
     - chrome
 
-# Install Spotify Flatpak
 - name: Install Spotify Flatpak
   community.general.flatpak:
     name: "{{ spotify_flatpak_app_id }}"
@@ -600,7 +591,6 @@
     - applications
     - spotify
 
-# Install LibreOffice Flatpak
 - name: Install LibreOffice Flatpak
   community.general.flatpak:
     name: "{{ libreoffice_flatpak_app_id }}"
@@ -609,7 +599,6 @@
     - applications
     - libreoffice
 
-# Install Brave Browser Flatpak
 - name: Install Brave Browser Flatpak
   community.general.flatpak:
     name: "{{ brave_flatpak_app_id }}"
@@ -618,7 +607,6 @@
     - applications
     - brave
 
-# Install Zotero Flatpak
 - name: Install Zotero Flatpak
   community.general.flatpak:
     name: "{{ zotero_flatpak_app_id }}"

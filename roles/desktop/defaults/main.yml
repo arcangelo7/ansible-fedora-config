@@ -34,3 +34,40 @@ text_mime_types:
   - "text/x-ruby"
   - "text/x-go"
   - "text/x-rust"
+
+image_editor_app: "com.github.PintaProject.Pinta.desktop"
+
+image_mime_types:
+  - "image/png"
+  - "image/jpeg"
+  - "image/jpg"
+  - "image/gif"
+  - "image/bmp"
+  - "image/webp"
+  - "image/tiff"
+  - "image/x-icon"
+
+vector_graphics_app: "org.inkscape.Inkscape.desktop"
+
+vector_graphics_mime_types:
+  - "image/svg+xml"
+  - "image/svg+xml-compressed"
+
+pdf_viewer_app: "okularApplication_pdf.desktop"
+
+pdf_mime_types:
+  - "application/pdf"
+
+office_suite_app: "org.libreoffice.LibreOffice.desktop"
+
+document_mime_types:
+  - "application/vnd.oasis.opendocument.text"         # ODT
+  - "application/vnd.oasis.opendocument.spreadsheet"  # ODS
+  - "application/vnd.oasis.opendocument.presentation" # ODP
+  - "application/msword"                               # DOC
+  - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"   # DOCX
+  - "application/vnd.ms-excel"                         # XLS
+  - "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"        # XLSX
+  - "application/vnd.ms-powerpoint"                    # PPT
+  - "application/vnd.openxmlformats-officedocument.presentationml.presentation" # PPTX
+  - "text/rtf"

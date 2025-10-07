@@ -5,13 +5,13 @@ discord_flatpak_app_id: "com.discordapp.Discord"
 
 firefox_flatpak_app_id: "org.mozilla.firefox"
 
-vlc_flatpak_app_id: "org.videolan.VLC" 
+vlc_flatpak_app_id: "org.videolan.VLC"
 
-drawing_flatpak_app_id: "com.github.maoschanz.drawing"
+pinta_flatpak_app_id: "com.github.PintaProject.Pinta"
+
+inkscape_flatpak_app_id: "org.inkscape.Inkscape"
 
 zoom_flatpak_app_id: "us.zoom.Zoom"
-
-remmina_flatpak_app_id: "org.remmina.Remmina"
 
 stremio_flatpak_app_id: "com.stremio.Stremio"
 
