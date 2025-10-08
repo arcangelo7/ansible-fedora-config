@@ -71,3 +71,17 @@ document_mime_types:
   - "application/vnd.ms-powerpoint"                    # PPT
   - "application/vnd.openxmlformats-officedocument.presentationml.presentation" # PPTX
   - "text/rtf"
+
+web_browser_app: "com.brave.Browser.desktop"
+
+web_mime_types:
+  - "x-scheme-handler/http"
+  - "x-scheme-handler/https"
+  - "x-scheme-handler/ftp"
+  - "x-scheme-handler/chrome"
+  - "application/x-extension-htm"
+  - "application/x-extension-html"
+  - "application/x-extension-shtml"
+  - "application/xhtml+xml"
+  - "application/x-extension-xhtml"
+  - "application/x-extension-xht"
