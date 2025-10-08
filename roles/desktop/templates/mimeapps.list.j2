@@ -34,6 +34,11 @@
 {{ mime_type }}={{ web_browser_app }}
 {% endfor %}
 
+# Torrent client associations
+{% for mime_type in torrent_mime_types %}
+{{ mime_type }}={{ torrent_client_app }}
+{% endfor %}
+
 [Added Associations]
 # Video associations
 {% for mime_type in video_mime_types %}
@@ -68,4 +73,9 @@
 # Web browser associations
 {% for mime_type in web_mime_types %}
 {{ mime_type }}={{ web_browser_app }};
+{% endfor %}
+
+# Torrent client associations
+{% for mime_type in torrent_mime_types %}
+{{ mime_type }}={{ torrent_client_app }};
 {% endfor %}

@@ -85,3 +85,9 @@ web_mime_types:
   - "application/xhtml+xml"
   - "application/x-extension-xhtml"
   - "application/x-extension-xht"
+
+torrent_client_app: "org.qbittorrent.qBittorrent.desktop"
+
+torrent_mime_types:
+  - "application/x-bittorrent"
+  - "x-scheme-handler/magnet"
