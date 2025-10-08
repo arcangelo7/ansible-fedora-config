@@ -79,6 +79,14 @@
     - applications
     - telegram
 
+- name: Install qBittorrent Flatpak
+  community.general.flatpak:
+    name: "{{ qbittorrent_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - qbittorrent
+
 # Install Joplin AppImage
 # Check if Joplin is already installed
 - name: Check if Joplin AppImage exists

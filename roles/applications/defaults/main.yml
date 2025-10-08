@@ -17,6 +17,8 @@ stremio_flatpak_app_id: "com.stremio.Stremio"
 
 telegram_flatpak_app_id: "org.telegram.desktop"
 
+qbittorrent_flatpak_app_id: "org.qbittorrent.qBittorrent"
+
 spotify_flatpak_app_id: "com.spotify.Client"
 
 joplin_appimage_url: "https://github.com/laurent22/joplin/releases/download/v3.2.13/Joplin-3.2.13.AppImage"

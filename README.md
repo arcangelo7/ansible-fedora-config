@@ -77,7 +77,7 @@ Creates separate subvolumes for `var/cache`, `var/log`, `var/tmp`, etc. and upda
 
 ### Applications
 - Communication: Discord, Telegram, Zoom
-- Media: VLC, Spotify, Stremio
+- Media: VLC, Spotify, Stremio, qBittorrent
 - Browsers: Google Chrome, Brave
 - Graphics: Pinta, Inkscape
 - Productivity: LibreOffice, Zotero, Joplin (AppImage and CLI with WebDAV sync)
