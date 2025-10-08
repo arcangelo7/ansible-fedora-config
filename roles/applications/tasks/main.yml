@@ -930,6 +930,15 @@
     - okular
     - pdf
 
+# Install PlantUML
+- name: Install PlantUML package
+  dnf:
+    name: "{{ plantuml_package_name }}"
+    state: present
+  tags:
+    - applications
+    - plantuml
+
 - name: Install Portfolio Flutter App
   import_tasks: portfolio.yml
   tags:

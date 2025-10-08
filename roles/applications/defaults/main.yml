@@ -66,3 +66,5 @@ texlive_packages:
   - "latexmk"
 
 okular_package_name: "okular"
+
+plantuml_package_name: "plantuml"

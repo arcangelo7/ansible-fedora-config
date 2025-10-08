@@ -82,7 +82,7 @@ Creates separate subvolumes for `var/cache`, `var/log`, `var/tmp`, etc. and upda
 - Graphics: Pinta, Inkscape
 - Productivity: LibreOffice, Zotero, Joplin (AppImage and CLI with WebDAV sync)
 - System: Conky system monitor, Btrfs Assistant, Okular PDF viewer
-- Development: TeXLive
+- Development: TeXLive, PlantUML
 - VPN: Mullvad VPN, openfortivpn
 - Tools: Jimmy CLI, Portfolio
 
