@@ -376,14 +376,6 @@
     - joplin-cli
     - joplin-sync
 
-- name: Debug Joplin CLI configuration state
-  debug:
-    msg: "Joplin CLI configuration state: {{ joplin_config_state_json }}"
-  tags:
-    - applications
-    - joplin-cli
-    - joplin-sync
-
 - name: Configure Joplin CLI sync target
   command: joplin config sync.target {{ joplin_sync_target }}
   become: false
@@ -423,6 +415,18 @@
     - joplin-cli
     - joplin-sync
 
+- name: Check if Joplin CLI WebDAV password is actually set
+  command: joplin config sync.5.password
+  become: false
+  become_user: "{{ local_user }}"
+  register: joplin_current_password
+  changed_when: false
+  failed_when: false
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
 - name: Configure Joplin CLI WebDAV password
   command: joplin config sync.5.password {{ joplin_sync_webdav_password }}
   become: false
@@ -430,9 +434,11 @@
   register: joplin_sync_password_result
   changed_when: joplin_sync_password_result.rc == 0
   failed_when: joplin_sync_password_result.rc != 0
-  when: 
+  no_log: true
+  when:
     - joplin_sync_webdav_password != ""
-    - joplin_config_state_json.webdav_password_set is not defined or joplin_config_state_json.webdav_password_set != true
+    - joplin_current_password.stdout is defined
+    - joplin_current_password.stdout | trim == "sync.5.password ="
   tags:
     - applications
     - joplin-cli

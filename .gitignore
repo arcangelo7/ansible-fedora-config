@@ -13,7 +13,4 @@ __pycache__/
 
 # OS files
 .DS_Store
-Thumbs.db
-
-# Joplin vault
-group_vars/vault/joplin.yml 
+Thumbs.db 
