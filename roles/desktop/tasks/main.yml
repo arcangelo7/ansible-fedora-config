@@ -383,14 +383,26 @@
     - ddcui
 
 # Load i2c kernel modules
-- name: Load i2c kernel modules immediately
-  modprobe:
-    name: "{{ item }}"
-    state: present
-  loop: 
+- name: Check if i2c modules are already loaded
+  shell: lsmod | grep -q '^{{ item }}\s' && echo "loaded" || echo "not_loaded"
+  register: i2c_modules_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  loop:
     - i2c_dev
     - i2c_core
-  ignore_errors: yes  # Ignore errors if modules are already loaded
+  tags:
+    - desktop
+    - monitor
+    - ddcui
+
+- name: Load i2c kernel modules immediately
+  modprobe:
+    name: "{{ item.item }}"
+    state: present
+  loop: "{{ i2c_modules_check.results }}"
+  when: item.stdout == "not_loaded"
   tags:
     - desktop
     - monitor

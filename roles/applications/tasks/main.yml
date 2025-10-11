@@ -462,22 +462,28 @@
     - joplin-cli
     - joplin-sync
 
-# Esegui la sincronizzazione iniziale di Joplin
-- name: Esegui la sincronizzazione di Joplin CLI
+# Run Joplin CLI initial synchronization
+- name: Sync Joplin CLI
   command: joplin sync
   become: false
   become_user: "{{ local_user }}"
   register: joplin_sync_result
-  changed_when: joplin_sync_result.rc == 0
-  failed_when: false  # Non fallire se la sincronizzazione non riesce
+  changed_when: >
+    joplin_sync_result.rc == 0 and (
+      'Downloaded' in joplin_sync_result.stdout or
+      'Uploaded' in joplin_sync_result.stdout or
+      'Created' in joplin_sync_result.stdout or
+      'Updated' in joplin_sync_result.stdout
+    )
+  failed_when: false  # Do not fail if synchronization fails
   tags:
     - applications
     - joplin-cli
     - joplin-sync
 
-- name: Mostra il risultato della sincronizzazione
+- name: Display synchronization result
   debug:
-    msg: "Risultato sincronizzazione: {{ joplin_sync_result.stdout }}"
+    msg: "Synchronization result: {{ joplin_sync_result.stdout }}"
   when: joplin_sync_result.stdout is defined
   tags:
     - applications

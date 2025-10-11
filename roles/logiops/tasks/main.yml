@@ -63,13 +63,6 @@
   when: not logid_installed.stat.exists or logiops_force_rebuild | default(false)
   tags: logiops
 
-- name: Create logiops configuration directory
-  file:
-    path: /etc
-    state: directory
-    mode: '0755'
-  tags: logiops
-
 - name: Copy logiops configuration file
   template:
     src: logid.cfg.j2
