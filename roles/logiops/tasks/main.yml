@@ -11,18 +11,27 @@
     state: present
   tags: logiops
 
+- name: Check if logiops is already installed
+  stat:
+    path: /usr/local/bin/logid
+  register: logid_installed
+  tags: logiops
+
 - name: Create logiops build directory
   file:
     path: /tmp/logiops-build
     state: directory
     mode: '0755'
+  when: not logid_installed.stat.exists or logiops_force_rebuild | default(false)
   tags: logiops
 
 - name: Clone logiops repository
   git:
     repo: https://github.com/PixlOne/logiops.git
     dest: /tmp/logiops-build/logiops
-    force: yes
+    force: no
+    update: yes
+  when: not logid_installed.stat.exists or logiops_force_rebuild | default(false)
   tags: logiops
 
 - name: Create build directory
@@ -30,27 +39,28 @@
     path: /tmp/logiops-build/logiops/build
     state: directory
     mode: '0755'
+  when: not logid_installed.stat.exists or logiops_force_rebuild | default(false)
   tags: logiops
 
 - name: Configure logiops build
   command: cmake -DCMAKE_BUILD_TYPE=Release ..
   args:
     chdir: /tmp/logiops-build/logiops/build
-    creates: /tmp/logiops-build/logiops/build/Makefile
+  when: not logid_installed.stat.exists or logiops_force_rebuild | default(false)
   tags: logiops
 
 - name: Build logiops
   command: make -j{{ ansible_processor_vcpus }}
   args:
     chdir: /tmp/logiops-build/logiops/build
-    creates: /tmp/logiops-build/logiops/build/src/logid/logid
+  when: not logid_installed.stat.exists or logiops_force_rebuild | default(false)
   tags: logiops
 
 - name: Install logiops
   command: make install
   args:
     chdir: /tmp/logiops-build/logiops/build
-    creates: /usr/local/bin/logid
+  when: not logid_installed.stat.exists or logiops_force_rebuild | default(false)
   tags: logiops
 
 - name: Create logiops configuration directory
@@ -82,4 +92,5 @@
   file:
     path: /tmp/logiops-build
     state: absent
+  when: (not logid_installed.stat.exists or logiops_force_rebuild | default(false)) and logiops_cleanup_build | default(true)
   tags: logiops
