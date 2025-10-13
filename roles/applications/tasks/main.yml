@@ -1,4 +1,25 @@
 ---
+# Load Joplin vault variables only when needed
+- name: Check if Joplin vault file exists
+  stat:
+    path: "{{ playbook_dir }}/group_vars/vault/joplin.yml"
+  register: joplin_vault_check
+  delegate_to: localhost
+  become: false
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
+- name: Load Joplin vault variables
+  include_vars:
+    file: "{{ playbook_dir }}/group_vars/vault/joplin.yml"
+  when: joplin_vault_check.stat.exists
+  tags:
+    - applications
+    - joplin-cli
+    - joplin-sync
+
 # Install Discord from Flathub
 - name: Check if Flathub is enabled
   command: flatpak remotes --columns=name

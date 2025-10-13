@@ -24,16 +24,19 @@ Ansible playbooks to automatically configure a Fedora system with my personal se
 2. Run specific tags:
    ```bash
    # System and base packages
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "system,base-packages"
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "system,base-packages"
 
    # Development tools
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "development"
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "development"
 
    # Desktop environment
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "desktop"
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "desktop"
 
-   # Applications
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "applications"
+   # Applications (general)
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "applications"
+
+   # Joplin with WebDAV sync (requires vault password)
+   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "joplin-cli,joplin-sync"
    ```
 
 ## BTRFS Subvolume Setup
@@ -124,11 +127,11 @@ office_suite_app: "org.libreoffice.LibreOffice.desktop"
 
 Each application handles specific MIME types (video, text, images, SVG, PDF, office documents). Modify the corresponding `*_mime_types` lists to customize.
 
-Run with: `ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags desktop,mimeapps`
+Run with: `ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags desktop,mimeapps`
 
 ### Joplin WebDAV Setup
 
-1. Create `group_vars/all/joplin_settings.yml`:
+1. Edit WebDAV settings in `roles/applications/defaults/main.yml`:
    ```yaml
    joplin_sync_webdav_path: "YOUR_WEBDAV_URL"
    joplin_sync_webdav_username: "YOUR_USERNAME"
@@ -136,9 +139,11 @@ Run with: `ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-va
 
 2. Create encrypted vault for password:
    ```bash
-   ansible-vault create group_vars/all/vault.yml
+   ansible-vault create group_vars/vault/joplin.yml
    ```
    Add:
    ```yaml
    vault_joplin_webdav_password: "YOUR_PASSWORD"
-   ``` 
+   ```
+
+> **Note:** Vault password is only required when using `joplin-cli` or `joplin-sync` tags. Other playbook operations do not require vault password. 
