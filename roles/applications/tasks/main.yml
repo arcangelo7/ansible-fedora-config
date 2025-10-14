@@ -511,6 +511,91 @@
     - applications
     - jimmy-cli
 
+- name: Check if Caligula version metadata file exists
+  stat:
+    path: "{{ caligula_metadata_file }}"
+  register: caligula_metadata_check
+  tags:
+    - applications
+    - caligula
+
+- name: Read installed Caligula version from metadata file
+  slurp:
+    src: "{{ caligula_metadata_file }}"
+  register: installed_caligula_version_raw
+  when: caligula_metadata_check.stat.exists
+  tags:
+    - applications
+    - caligula
+
+- name: Set installed Caligula version from metadata
+  set_fact:
+    installed_caligula_version: "{{ installed_caligula_version_raw.content | b64decode | trim }}"
+  when: caligula_metadata_check.stat.exists and installed_caligula_version_raw is success
+  tags:
+    - applications
+    - caligula
+
+- name: Set default version for Caligula if no metadata exists
+  set_fact:
+    installed_caligula_version: "0.0.0"
+  when: not caligula_metadata_check.stat.exists
+  tags:
+    - applications
+    - caligula
+
+- name: Debug Caligula version comparison
+  debug:
+    msg:
+      - "Installed Caligula version: {{ installed_caligula_version | default('unknown') }}"
+      - "New Caligula version: {{ caligula_version }}"
+  tags:
+    - applications
+    - caligula
+
+- name: Set Caligula version check result
+  set_fact:
+    caligula_needs_update: "{{ installed_caligula_version != caligula_version }}"
+  tags:
+    - applications
+    - caligula
+
+- name: Debug Caligula update decision
+  debug:
+    msg: "Caligula needs update: {{ caligula_needs_update }}"
+  tags:
+    - applications
+    - caligula
+
+- name: Remove old Caligula binary if version is different
+  file:
+    path: "{{ caligula_install_path }}"
+    state: absent
+  when: caligula_needs_update
+  tags:
+    - applications
+    - caligula
+
+- name: Download Caligula
+  get_url:
+    url: "{{ caligula_download_url }}"
+    dest: "{{ caligula_install_path }}"
+    mode: '0755'
+  when: caligula_needs_update
+  tags:
+    - applications
+    - caligula
+
+- name: Save new Caligula version to metadata file
+  copy:
+    content: "{{ caligula_version }}"
+    dest: "{{ caligula_metadata_file }}"
+    mode: '0644'
+  when: caligula_needs_update
+  tags:
+    - applications
+    - caligula
+
 - name: Install openfortivpn package
   dnf:
     name: openfortivpn

@@ -37,6 +37,11 @@ joplin_sync_webdav_password: "{{ vault_joplin_webdav_password | default('') }}" 
 jimmy_download_url: "https://github.com/marph91/jimmy/releases/latest/download/jimmy-linux"
 jimmy_install_path: "/usr/local/bin/jimmy"
 
+caligula_version: "0.4.9"
+caligula_download_url: "https://github.com/ifd3f/caligula/releases/download/v{{ caligula_version }}/caligula-x86_64-linux"
+caligula_install_path: "/usr/local/bin/caligula"
+caligula_metadata_file: "/usr/local/bin/.caligula.version"
+
 btrfs_assistant_package_name: "btrfs-assistant"
 
 google_chrome_repo_url: "https://dl.google.com/linux/chrome/rpm/stable/x86_64"
