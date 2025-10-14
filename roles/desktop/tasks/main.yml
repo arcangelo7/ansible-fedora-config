@@ -1,5 +1,4 @@
 ---
-# Check if gnome-tweaks is already installed
 - name: Check if gnome-tweaks is installed
   command: rpm -q gnome-tweaks
   register: gnome_tweaks_check
@@ -10,7 +9,6 @@
     - desktop
     - themes
 
-# Install themes and icons
 - name: Install gnome-tweaks
   dnf:
     name:
@@ -21,7 +19,6 @@
     - desktop
     - themes
 
-# Check if GNOME extensions are already installed
 - name: Check installed GNOME extensions
   command: rpm -q gnome-shell-extension-appindicator gnome-shell-extension-dash-to-dock gnome-extensions-app
   register: gnome_extensions_check
@@ -32,7 +29,6 @@
     - desktop
     - gnome-extensions
 
-# Install GNOME extensions
 - name: Install GNOME extensions
   dnf:
     name:
@@ -129,7 +125,6 @@
     - gtile
     - always # Show message if installation happened
 
-# Verify if Flatpak is installed
 - name: Check if Flatpak is installed
   command: which flatpak
   register: flatpak_check
@@ -140,7 +135,6 @@
     - desktop
     - browser
 
-# Install Flatpak
 - name: Ensure Flatpak is installed
   dnf:
     name: flatpak
@@ -151,7 +145,6 @@
     - desktop
     - browser
 
-# Check if Flathub repository is already added
 - name: Check if Flathub repository is added
   command: flatpak remote-list
   register: flathub_check
@@ -169,7 +162,6 @@
     - desktop
     - browser
 
-# Check if Thunderbird is already installed
 - name: Check if Thunderbird is installed
   command: rpm -q thunderbird
   register: thunderbird_check
@@ -181,7 +173,6 @@
     - email
     - thunderbird
 
-# Install Thunderbird
 - name: Install Thunderbird email client
   dnf:
     name: thunderbird
@@ -192,7 +183,6 @@
     - email
     - thunderbird
 
-# Check if GNOME Remote Desktop packages are installed
 - name: Check if GNOME Remote Desktop is installed
   command: rpm -q gnome-remote-desktop
   register: remote_desktop_check
@@ -203,7 +193,6 @@
     - desktop
     - remote-desktop
 
-# Install GNOME Remote Desktop
 - name: Install GNOME Remote Desktop
   dnf:
     name:
@@ -214,7 +203,6 @@
     - desktop
     - remote-desktop
 
-# Install psutil Python module required for dconf
 - name: Install Python psutil module
   become: yes
   package:
@@ -224,7 +212,6 @@
     - desktop
     - remote-desktop
 
-# Enable GNOME Remote Desktop service for the user
 - name: Enable GNOME Remote Desktop service for user
   systemd:
     name: gnome-remote-desktop.service
@@ -252,7 +239,6 @@
     - desktop
     - remote-desktop
 
-# Generate RDP certificate if it doesn't exist
 - name: Check if RDP certificate exists
   stat:
     path: "{{ ansible_user_dir }}/.local/share/gnome-remote-desktop/rdp-tls.crt"
@@ -271,7 +257,6 @@
     - desktop
     - remote-desktop
 
-# Ensure openssl is installed
 - name: Install openssl
   become: yes
   package:
@@ -289,7 +274,6 @@
     - desktop
     - remote-desktop
 
-# Set proper permissions on TLS files
 - name: Set permissions on TLS cert and key
   file:
     path: "{{ item }}"
@@ -302,7 +286,6 @@
     - desktop
     - remote-desktop
 
-# Configure firewall for RDP
 - name: Allow RDP through the firewall
   firewalld:
     service: rdp
@@ -358,7 +341,6 @@
     - monitor
     - ddcui
 
-# Ensure required kernel modules are loaded
 - name: Create modules-load.d directory for ddcutil
   file:
     path: /etc/modules-load.d
@@ -382,7 +364,6 @@
     - monitor
     - ddcui
 
-# Load i2c kernel modules
 - name: Check if i2c modules are already loaded
   shell: lsmod | grep -q '^{{ item }}\s' && echo "loaded" || echo "not_loaded"
   register: i2c_modules_check
@@ -408,7 +389,6 @@
     - monitor
     - ddcui
 
-# Add udev rules for i2c access
 - name: Add udev rules for i2c access
   copy:
     dest: /etc/udev/rules.d/90-i2c-permissions.rules
@@ -422,7 +402,6 @@
     - monitor
     - ddcui
 
-# Create i2c group
 - name: Create i2c group if it doesn't exist
   group:
     name: i2c
@@ -433,7 +412,6 @@
     - monitor
     - ddcui
 
-# Add user to i2c group
 - name: Add user to i2c group
   user:
     name: "{{ local_user }}"
@@ -453,9 +431,7 @@
     - monitor
     - ddcui
 
-# --- Desktop Background Configuration ---
-
-# Ensure the target directory for backgrounds exists
+# Desktop Background Configuration
 - name: Create user backgrounds directory
   file:
     path: "/home/{{ local_user }}/.local/share/backgrounds"
@@ -466,7 +442,6 @@
     - desktop
     - background
 
-# Copy the background image to the target directory
 - name: Copy background image
   copy:
     src: roles/desktop/images/wallhaven-q621dq.png
@@ -477,7 +452,6 @@
     - desktop
     - background
 
-# Set the GNOME desktop background
 - name: Set GNOME desktop background
   dconf:
     key: "/org/gnome/desktop/background/{{ item }}"
@@ -492,7 +466,6 @@
     - background
     - gnome-settings
 
-# Configure default applications via mimeapps.list
 - name: Deploy mimeapps.list for default applications
   template:
     src: mimeapps.list.j2
@@ -503,3 +476,68 @@
     - desktop
     - mimeapps
     - default-apps
+
+# Tilix terminal emulator and keybinding
+- name: Check if Tilix is installed
+  command: rpm -q tilix
+  register: tilix_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  tags:
+    - desktop
+    - terminal
+    - tilix
+
+- name: Install Tilix terminal emulator
+  dnf:
+    name: tilix
+    state: present
+  when: tilix_check.rc != 0
+  tags:
+    - desktop
+    - terminal
+    - tilix
+- name: Configure custom keybinding name for terminal
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal-launcher/name"
+    value: "'Launch Terminal'"
+    state: present
+  become: no
+  tags:
+    - desktop
+    - terminal
+    - keybinding
+
+- name: Configure custom keybinding command for terminal
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal-launcher/command"
+    value: "'tilix'"
+    state: present
+  become: no
+  tags:
+    - desktop
+    - terminal
+    - keybinding
+
+- name: Configure custom keybinding shortcut for terminal
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal-launcher/binding"
+    value: "'<Primary><Alt>t'"
+    state: present
+  become: no
+  tags:
+    - desktop
+    - terminal
+    - keybinding
+
+- name: Register terminal-launcher in custom keybindings list
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
+    value: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal-launcher/']"
+    state: present
+  become: no
+  tags:
+    - desktop
+    - terminal
+    - keybinding

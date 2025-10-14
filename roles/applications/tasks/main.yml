@@ -20,7 +20,6 @@
     - joplin-cli
     - joplin-sync
 
-# Install Discord from Flathub
 - name: Check if Flathub is enabled
   command: flatpak remotes --columns=name
   register: flatpak_remotes
@@ -108,8 +107,6 @@
     - applications
     - qbittorrent
 
-# Install Joplin AppImage
-# Check if Joplin is already installed
 - name: Check if Joplin AppImage exists
   stat:
     path: "{{ joplin_appimage_dest }}"
@@ -198,7 +195,6 @@
     - applications
     - joplin
 
-# Remove old Joplin version if a different version is being installed
 - name: Remove old Joplin AppImage if version is different
   file:
     path: "{{ joplin_appimage_dest }}"
@@ -208,7 +204,6 @@
     - applications
     - joplin
 
-# Install Joplin AppImage
 - name: Create directory for AppImages
   file:
     path: "{{ appimages_dir }}"
@@ -301,7 +296,6 @@
     - applications
     - joplin
 
-# Add Joplin to PATH
 - name: Create bin directory if it doesn't exist
   file:
     path: "{{ bin_dir | default('/usr/local/bin') }}"
@@ -333,7 +327,6 @@
     - applications
     - joplin
 
-# Install Joplin CLI (terminal version)
 - name: Install Node.js and npm (required for Joplin CLI)
   dnf:
     name: 
@@ -353,7 +346,6 @@
     - applications
     - joplin-cli
 
-# Configure Joplin CLI sync - Approccio basato su file di stato
 - name: Check if Joplin CLI configuration state file exists
   stat:
     path: "/home/{{ local_user }}/.joplin-cli-state.json"
@@ -483,7 +475,6 @@
     - joplin-cli
     - joplin-sync
 
-# Run Joplin CLI initial synchronization
 - name: Sync Joplin CLI
   command: joplin sync
   become: false
@@ -511,7 +502,6 @@
     - joplin-cli
     - joplin-sync
 
-# Install Jimmy CLI
 - name: Download Jimmy CLI
   get_url:
     url: "{{ jimmy_download_url }}"
@@ -521,7 +511,6 @@
     - applications
     - jimmy-cli
 
-# Install openfortivpn
 - name: Install openfortivpn package
   dnf:
     name: openfortivpn
@@ -530,7 +519,6 @@
     - applications
     - vpn
 
-# Install Mullvad VPN
 - name: Check Fedora version for Mullvad repository
   command: rpm -E %fedora
   register: fedora_version
@@ -569,7 +557,6 @@
     - vpn
     - mullvad
 
-# Install Btrfs Assistant
 - name: Install Btrfs Assistant package
   dnf:
     name: "{{ btrfs_assistant_package_name }}"
@@ -579,7 +566,6 @@
     - btrfs
     - openfortivpn
 
-# Add VPN alias to user's .bashrc
 - name: Check if vpnunibo alias already exists in .bashrc
   shell: grep -q "^alias vpnunibo=" "/home/{{ local_user }}/.bashrc"
   register: vpnunibo_alias_check
@@ -603,7 +589,6 @@
     - vpn
     - openfortivpn
 
-# Install Google Chrome
 - name: Add Google Chrome repository
   yum_repository:
     name: google-chrome
@@ -656,7 +641,15 @@
     - applications
     - zotero
 
-# Install Conky from Source with Lua/Cairo support
+- name: Check if Conky is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/conky
+  register: conky_installed
+  tags:
+    - applications
+    - conky
+    - conky-build
+
 - name: Install Conky build dependencies
   become: true
   ansible.builtin.dnf:
@@ -689,6 +682,7 @@
       # Optional but potentially useful
       - git
     state: present
+  when: not conky_installed.stat.exists
   tags:
     - applications
     - conky
@@ -699,6 +693,7 @@
     path: "{{ conky_build_dir }}"
     state: directory
     mode: '0755'
+  when: not conky_installed.stat.exists
   tags:
     - applications
     - conky
@@ -708,6 +703,7 @@
   ansible.builtin.get_url:
     url: "{{ conky_source_url }}"
     dest: "{{ conky_build_dir }}/conky-{{ conky_version }}.tar.gz"
+  when: not conky_installed.stat.exists
   tags:
     - applications
     - conky
@@ -718,7 +714,7 @@
     src: "{{ conky_build_dir }}/conky-{{ conky_version }}.tar.gz"
     dest: "{{ conky_build_dir }}"
     remote_src: yes
-    creates: "{{ conky_src_dir }}/CMakeLists.txt" # Avoid re-extracting
+  when: not conky_installed.stat.exists
   tags:
     - applications
     - conky
@@ -729,6 +725,7 @@
     path: "{{ conky_src_dir }}/build"
     state: directory
     mode: '0755'
+  when: not conky_installed.stat.exists
   tags:
     - applications
     - conky
@@ -748,7 +745,7 @@
     -D BUILD_MPD=OFF
   args:
     chdir: "{{ conky_src_dir }}/build"
-    creates: "{{ conky_src_dir }}/build/Makefile" # Avoid re-configuring
+  when: not conky_installed.stat.exists
   tags:
     - applications
     - conky
@@ -758,7 +755,7 @@
   ansible.builtin.command: make -j{{ ansible_processor_vcpus | default(1) }}
   args:
     chdir: "{{ conky_src_dir }}/build"
-    creates: "{{ conky_src_dir }}/build/src/conky" # Avoid re-compiling
+  when: not conky_installed.stat.exists
   tags:
     - applications
     - conky
@@ -769,7 +766,7 @@
   ansible.builtin.command: make install
   args:
     chdir: "{{ conky_src_dir }}/build"
-    creates: /usr/local/sbin/conky # Avoid re-installing if binary exists
+  when: not conky_installed.stat.exists
   tags:
     - applications
     - conky
@@ -786,7 +783,6 @@
     - conky
     - sensors
 
-# Configure Conky
 - name: Ensure Conky config base directory exists
   become: false
   become_user: "{{ local_user }}"
@@ -899,7 +895,6 @@
     - conky-config
     - fonts
 
-# Autostart Conky via systemd user service
 - name: Ensure systemd user directory exists
   become: false
   become_user: "{{ local_user }}"
@@ -943,7 +938,6 @@
     - conky-config
     - conky-autostart
 
-# Install TeXLive packages
 - name: Install TeXLive packages
   dnf:
     name: "{{ texlive_packages }}"
@@ -953,7 +947,6 @@
     - texlive
     - latex
 
-# Install Okular PDF viewer
 - name: Install Okular PDF viewer
   dnf:
     name: "{{ okular_package_name }}"
@@ -963,7 +956,6 @@
     - okular
     - pdf
 
-# Install PlantUML
 - name: Install PlantUML package
   dnf:
     name: "{{ plantuml_package_name }}"
