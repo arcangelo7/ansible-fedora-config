@@ -54,6 +54,8 @@ brave_flatpak_app_id: "com.brave.Browser"
 
 zotero_flatpak_app_id: "org.zotero.Zotero"
 
+gradia_flatpak_app_id: "be.alexandervanhee.gradia"
+
 portfolio_version: "1.8.4"
 portfolio_download_url: "https://github.com/arcangelo7/portfolio/releases/download/v{{portfolio_version}}/portfolio-linux-{{portfolio_version}}.tar.gz"
 portfolio_archive: "/tmp/portfolio-linux-{{ portfolio_version }}.tar.gz"

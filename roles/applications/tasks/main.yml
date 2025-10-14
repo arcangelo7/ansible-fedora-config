@@ -641,6 +641,93 @@
     - applications
     - zotero
 
+- name: Install Gradia screenshot tool Flatpak
+  community.general.flatpak:
+    name: "{{ gradia_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - gradia
+    - screenshot
+
+# Configure Gradia screenshot keybindings
+- name: Disable default GNOME screenshot keybinding
+  dconf:
+    key: "/org/gnome/shell/keybindings/screenshot"
+    value: "@as []"
+    state: present
+  become: no
+  tags:
+    - applications
+    - gradia
+    - screenshot
+
+- name: Disable default GNOME show-screenshot-ui keybinding
+  dconf:
+    key: "/org/gnome/shell/keybindings/show-screenshot-ui"
+    value: "@as []"
+    state: present
+  become: no
+  tags:
+    - applications
+    - gradia
+    - screenshot
+
+- name: Get current custom keybindings list
+  command: dconf read /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings
+  register: current_keybindings
+  changed_when: false
+  become: no
+  tags:
+    - applications
+    - gradia
+    - screenshot
+
+- name: Configure custom keybinding name for Gradia
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gradia-screenshot/name"
+    value: "'Gradia Screenshot'"
+    state: present
+  become: no
+  tags:
+    - applications
+    - gradia
+    - screenshot
+
+- name: Configure custom keybinding command for Gradia
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gradia-screenshot/command"
+    value: "'flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE'"
+    state: present
+  become: no
+  tags:
+    - applications
+    - gradia
+    - screenshot
+
+- name: Configure custom keybinding shortcut for Gradia
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gradia-screenshot/binding"
+    value: "'Print'"
+    state: present
+  become: no
+  tags:
+    - applications
+    - gradia
+    - screenshot
+
+- name: Add Gradia to custom keybindings list
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
+    value: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal-launcher/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gradia-screenshot/']"
+    state: present
+  become: no
+  when: "'/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gradia-screenshot/' not in current_keybindings.stdout"
+  tags:
+    - applications
+    - gradia
+    - screenshot
+
 - name: Check if Conky is already installed
   ansible.builtin.stat:
     path: /usr/local/bin/conky
