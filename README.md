@@ -1,4 +1,4 @@
-# Fedora System Configuration with Ansible
+# Fedora system configuration with Ansible
 
 ![Configured Desktop Preview](preview.png)
 
@@ -8,142 +8,160 @@ Ansible playbooks to automatically configure a Fedora system with my personal se
 
 - Fedora (tested on Fedora 41)
 - Ansible installed (`sudo dnf install ansible`)
-- For BTRFS script: BTRFS filesystem on root partition
+- BTRFS filesystem on root partition (optional, for subvolume script)
 
-## Usage
+## Quick start
 
-> **Note:** Set `local_user` in `group_vars/workstations.yml` to your username.
+Set `local_user` in `group_vars/workstations.yml` to your username, then run:
 
-1. Clone and run:
-   ```bash
-   git clone https://github.com/arcangelo/fedora-ansible-config.git
-   cd fedora-ansible-config
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass
+```bash
+ansible-playbook -i inventory.yml main.yml --ask-become-pass
+```
+
+For Joplin WebDAV sync, add `--ask-vault-pass` flag.
+
+## What this playbook does
+
+### System configuration
+- Removes Fedora bloatware (GNOME apps, Flatpak preinstalled packages)
+- Updates all system packages
+- Installs base packages (git, htop, wget, curl, tmux, wireguard-tools, parallel, etc.)
+
+### Development environment
+- **Build tools**: gcc, make, automake, python-devel, nodejs, npm
+- **Version control**: Git with personal configuration, GitHub CLI
+- **Containerization**: Docker Desktop with requirements validation
+- **Python ecosystem**: pipx, Poetry, uv package manager
+- **Java development**: Multiple JDK versions (8, 11, 17, 21) via Adoptium Temurin with version switching
+- **Mobile development**: Flutter SDK, Android Studio, Android command-line tools
+- **Code editor**: Visual Studio Code
+
+### Desktop environment
+- **GNOME customization**: GNOME Tweaks, extensions (AppIndicator, Dash to Dock, gTile)
+- **Terminal**: Tilix with Ctrl+Alt+T keybinding
+- **Email**: Thunderbird
+- **Monitor control**: ddcutil/ddcui for external monitor brightness adjustment
+- **Display**: Custom desktop background
+- **File associations**: Default applications for common file types (video, images, documents, PDFs)
+
+### Applications
+
+**Communication**
+- Discord, Telegram, Zoom (Flatpak)
+
+**Media**
+- VLC, Spotify, Stremio, qBittorrent (Flatpak)
+
+**Browsers**
+- Google Chrome, Brave (Flatpak)
+
+**Graphics and design**
+- Pinta (image editor), Inkscape (vector graphics) - Flatpak
+
+**Productivity**
+- LibreOffice (Flatpak)
+- Zotero (reference manager) - Flatpak
+- Joplin (notes) - AppImage with CLI and WebDAV synchronization
+- Okular (PDF viewer)
+
+**Development tools**
+- TeXLive (LaTeX distribution)
+- PlantUML (UML diagrams)
+
+**System utilities**
+- Conky (system monitor built from source with custom configuration)
+- Gradia (screenshot tool with Print Screen keybinding)
+- Caligula (ISO to USB writer)
+- Btrfs Assistant (snapshot management)
+
+**VPN**
+- Mullvad VPN
+- openfortivpn with UniBo VPN alias
+
+**CLI tools**
+- Jimmy (Joplin markdown exporter)
+- Portfolio (my portfolio app)
+
+### Logitech device support
+- Logiops (HID++ driver built from source)
+- Systemd service configuration
+- Custom gestures for MX Master mouse
+
+## Usage patterns
+
+Run specific components using tags:
+
+```bash
+# System and base packages only
+ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "system,base-packages"
+
+# Development environment
+ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "development"
+
+# Desktop environment
+ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "desktop"
+
+# Applications
+ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "applications"
+
+# Joplin with WebDAV sync (requires vault password)
+ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "joplin-cli,joplin-sync"
+```
+
+## Customization
+
+### User configuration
+Edit `group_vars/workstations.yml`:
+- `local_user`: Your username
+- `git_config`: Git name, email, and editor
+- Package lists for each category
+
+### Default applications
+Configure file associations in `roles/desktop/defaults/main.yml`:
+
+```yaml
+video_player_app: "org.videolan.VLC.desktop"
+text_editor_app: "code.desktop"
+image_editor_app: "com.github.PintaProject.Pinta.desktop"
+vector_graphics_app: "org.inkscape.Inkscape.desktop"
+pdf_viewer_app: "okularApplication_pdf.desktop"
+office_suite_app: "org.libreoffice.LibreOffice.desktop"
+```
+
+Apply with: `ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "desktop,mimeapps"`
+
+### Joplin WebDAV sync
+1. Edit `roles/applications/defaults/main.yml`:
+   ```yaml
+   joplin_sync_webdav_path: "YOUR_WEBDAV_URL"
+   joplin_sync_webdav_username: "YOUR_USERNAME"
    ```
 
-2. Run specific tags:
+2. Create encrypted vault:
    ```bash
-   # System and base packages
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "system,base-packages"
-
-   # Development tools
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "development"
-
-   # Desktop environment
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "desktop"
-
-   # Applications (general)
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags "applications"
-
-   # Joplin with WebDAV sync (requires vault password)
-   ansible-playbook -i inventory.yml main.yml --ask-become-pass --ask-vault-pass --tags "joplin-cli,joplin-sync"
+   ansible-vault create group_vars/vault/joplin.yml
    ```
 
-## BTRFS Subvolume Setup
+   Add password:
+   ```yaml
+   vault_joplin_webdav_password: "YOUR_PASSWORD"
+   ```
 
-Script to configure BTRFS subvolumes for `/var` directories to exclude them from snapshots.
+## BTRFS subvolume setup
 
-> **Note:** Edit `USER_NAME` in `btrfs-subvolumes-setup.sh` before running.
+Optional script to exclude `/var` directories from snapshots by creating separate subvolumes.
+
+Edit `USER_NAME` in `btrfs-subvolumes-setup.sh`, then run:
 
 ```bash
 chmod +x btrfs-subvolumes-setup.sh
 sudo ./btrfs-subvolumes-setup.sh
 ```
 
-Creates separate subvolumes for `var/cache`, `var/log`, `var/tmp`, etc. and updates `/etc/fstab`.
+Creates subvolumes for `var/cache`, `var/log`, `var/tmp`, and updates `/etc/fstab`.
 
 ## Features
 
-- **Idempotent**: Can be run multiple times safely
-- **Modular**: Use tags to run specific parts
-- **Configurable**: Modify variables in `group_vars/workstations.yml`
-
-## Roles
-
-### Common
-- System update and base packages
-- Cleanup of bloatware packages
-
-### Development
-- Development tools (gcc, make, etc.)
-- Git configuration
-- Docker Desktop
-- VS Code editor
-- Python tools (pipx, poetry, uv)
-- Java/Maven, Flutter SDK, Android Studio
-
-### Desktop
-- GNOME themes and extensions
-- Flatpak setup
-- Default applications configuration (MIME types)
-- Monitor brightness control (ddcutil/ddcui)
-
-### Applications
-- Communication: Discord, Telegram, Zoom
-- Media: VLC, Spotify, Stremio, qBittorrent
-- Browsers: Google Chrome, Brave
-- Graphics: Pinta, Inkscape
-- Productivity: LibreOffice, Zotero, Joplin (AppImage and CLI with WebDAV sync)
-- System: Conky system monitor, Btrfs Assistant, Okular PDF viewer
-- Development: TeXLive, PlantUML
-- VPN: Mullvad VPN, openfortivpn
-- Tools: Jimmy CLI, Portfolio
-
-### Logiops
-- Unofficial userspace driver for HID++ Logitech devices
-- Builds from source and configures systemd service
-- Default configuration for MX Master mouse with gestures
-
-## Customization
-
-Edit `group_vars/workstations.yml`:
-- `local_user`: Your username
-- `git_config`: Git settings (name, email, editor)
-- Package lists for customization
-
-### Default Applications (MIME Types)
-
-Configure default applications in `roles/desktop/defaults/main.yml`:
-
-```yaml
-# Video player (default: VLC)
-video_player_app: "org.videolan.VLC.desktop"
-
-# Text editor (default: VS Code)
-text_editor_app: "code.desktop"
-
-# Image editor (default: Pinta)
-image_editor_app: "com.github.PintaProject.Pinta.desktop"
-
-# Vector graphics (default: Inkscape)
-vector_graphics_app: "org.inkscape.Inkscape.desktop"
-
-# PDF viewer (default: Okular)
-pdf_viewer_app: "okularApplication_pdf.desktop"
-
-# Office suite (default: LibreOffice)
-office_suite_app: "org.libreoffice.LibreOffice.desktop"
-```
-
-Each application handles specific MIME types (video, text, images, SVG, PDF, office documents). Modify the corresponding `*_mime_types` lists to customize.
-
-Run with: `ansible-playbook -i inventory.yml main.yml --ask-become-pass --tags desktop,mimeapps`
-
-### Joplin WebDAV Setup
-
-1. Edit WebDAV settings in `roles/applications/defaults/main.yml`:
-   ```yaml
-   joplin_sync_webdav_path: "YOUR_WEBDAV_URL"
-   joplin_sync_webdav_username: "YOUR_USERNAME"
-   ```
-
-2. Create encrypted vault for password:
-   ```bash
-   ansible-vault create group_vars/vault/joplin.yml
-   ```
-   Add:
-   ```yaml
-   vault_joplin_webdav_password: "YOUR_PASSWORD"
-   ```
-
-> **Note:** Vault password is only required when using `joplin-cli` or `joplin-sync` tags. Other playbook operations do not require vault password. 
+- **Idempotent**: Safe to run multiple times
+- **Modular**: Use tags for selective execution
+- **Version-controlled**: Application versions tracked with metadata files for update detection 
