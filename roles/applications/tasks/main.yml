@@ -735,6 +735,14 @@
     - gradia
     - screenshot
 
+- name: Install Obsidian Flatpak
+  community.general.flatpak:
+    name: "{{ obsidian_flatpak_app_id }}"
+    state: present
+  tags:
+    - applications
+    - obsidian
+
 # Configure Gradia screenshot keybindings
 - name: Disable default GNOME screenshot keybinding
   dconf:
